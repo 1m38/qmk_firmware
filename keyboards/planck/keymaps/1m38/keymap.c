@@ -41,26 +41,28 @@ enum planck_keycodes {
 #define LOWER MO(_LOWER)
 #define RAISE MO(_RAISE)
 
-#define LOW_MH LT(_LOWER, KC_MHEN)
-#define RAI_HK LT(_RAISE, KC_HENK)
+#define LOW_MH LT(_LOWER, KC_MHEN)  // タップで無変換, ホールドでLOWER
+#define RAI_HK LT(_RAISE, KC_HENK)  // タップで変換, ホールドでRAISE
+#define CTL_ES CTL_T(KC_ESC)  // タップでEsc, ホールドでLCtrl
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 /* Qwerty
- * ,---------------------------------------------------------------------------------------.
- * | Tab  |   Q  |   W  |   E  |    R   |   T  |   Y  |    U   |   I  |   O  |   P  | Bksp |
- * |------+------+------+------+--------+------+------+--------+------+------+------+------|
- * | Esc  |   A  |   S  |   D  |    F   |   G  |   H  |    J   |   K  |   L  |   ;  |  "   |
- * |------+------+------+------+--------+------+------+--------+------+------+------+------|
- * | Shift|   Z  |   X  |   C  |    V   |   B  |   N  |    M   |   ,  |   .  |   /  |Enter |
- * |------+------+------+------+--------+------+------+--------+------+------+------+------|
- * | Brite| Ctrl | Alt  | GUI  | 無変換 |    Space    |  変換  | Left | Down |  Up  |Right |
- * |      |      |      |      |LT:Lower|             |LT:Raise|      |      |      |      |
- * `-----------------------------------------------------------------------------------'
+ * ,----------------------------------------------------------------------------------------.
+ * | Tab   |   Q  |   W  |   E  |    R   |   T  |   Y  |    U   |   I  |   O  |   P  | Bksp |
+ * |-------+------+------+------+--------+------+------+--------+------+------+------+------|
+ * | Esc   |   A  |   S  |   D  |    F   |   G  |   H  |    J   |   K  |   L  |   ;  |  "   |
+ * |LT:Ctrl|      |      |      |        |      |      |        |      |      |      |      |
+ * |-------+------+------+------+--------+------+------+--------+------+------+------+------|
+ * | Shift |   Z  |   X  |   C  |    V   |   B  |   N  |    M   |   ,  |   .  |   /  |Enter |
+ * |-------+------+------+------+--------+------+------+--------+------+------+------+------|
+ * | Brite | Ctrl | Alt  | GUI  | 無変換 |    Space    |  変換  | Left | Down |  Up  |Right |
+ * |       |      |      |      |LT:Lower|             |LT:Raise|      |      |      |      |
+ * `----------------------------------------------------------------------------------------'
  */
 [_QWERTY] = LAYOUT_planck_grid(
     KC_TAB,  KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,    KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    KC_BSPC,
-    KC_ESC,  KC_A,    KC_S,    KC_D,    KC_F,    KC_G,    KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, KC_QUOT,
+    CTL_ES,  KC_A,    KC_S,    KC_D,    KC_F,    KC_G,    KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, KC_QUOT,
     KC_LSFT, KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,    KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH, KC_ENT ,
     BACKLIT, KC_LCTL, KC_LALT, KC_LGUI, LOW_MH,  KC_SPC,  KC_SPC,  RAI_HK,  KC_LEFT, KC_DOWN, KC_UP,   KC_RGHT
 ),

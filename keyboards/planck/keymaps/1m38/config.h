@@ -39,3 +39,7 @@
 #endif
 
 #define ORYX_CONFIGURATOR
+
+#define PLANCK_EZ_LED_LOWER  2
+#define PLANCK_EZ_LED_RAISE  1
+#define PLANCK_EZ_LED_ADJUST 6

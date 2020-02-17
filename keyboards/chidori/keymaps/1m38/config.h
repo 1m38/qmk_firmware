@@ -46,3 +46,6 @@
     }, \
 }
 */
+
+#define TAPPING_TERM 180
+#define SWAP_CAPS 0

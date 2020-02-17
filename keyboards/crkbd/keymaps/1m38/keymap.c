@@ -1,5 +1,5 @@
 #include QMK_KEYBOARD_H
-
+#include "keymap_jp.h"
 
 #ifdef RGBLIGHT_ENABLE
 //Following line allows macro to read current RGB settings
@@ -13,18 +13,35 @@ extern uint8_t is_master;
 // Layer names don't all need to be of the same length, obviously, and you can also skip them
 // entirely and just use numbers.
 #define _QWERTY 0
-#define _LOWER 1
-#define _RAISE 2
+#define _RAISE 1
+#define _LOWER 2
 #define _ADJUST 3
 
 enum custom_keycodes {
   QWERTY = SAFE_RANGE,
-  LOWER,
   RAISE,
+  LOWER,
   ADJUST,
   BACKLIT,
   RGBRST
 };
+
+#if SWAP_CAPS
+  #define MY_LCTL KC_CAPS
+  #define MY_CAPS KC_LCTL
+#else
+  #define MY_LCTL KC_LCTL
+  #define MY_CAPS KC_CAPS
+#endif
+
+#define LOW_MH LT(_LOWER, KC_MHEN)  // タップで無変換, ホールドでLOWER
+#define RAI_HK LT(_RAISE, KC_HENK)  // タップで変換, ホールドでRAISE
+#define ALT_ESC ALT_T(KC_ESC)       // タップでEsc, ホールドでAlt
+#define WINPSCR G(KC_PSCR)          // Win + PrtScr
+#define WINSFTS G(S(KC_S))          // Win + Shift + S
+
+#define PANIC LALT(LCTL(KC_DEL))  // Ctrl-Alt-Del
+
 
 enum macro_keycodes {
   KC_SAMPLEMACRO,
@@ -35,48 +52,48 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //,-----------------------------------------------------.                    ,-----------------------------------------------------.
        KC_TAB,    KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,                         KC_Y,    KC_U,    KC_I,    KC_O,   KC_P,  KC_BSPC,\
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
-      KC_LCTL,    KC_A,    KC_S,    KC_D,    KC_F,    KC_G,                         KC_H,    KC_J,    KC_K,    KC_L, KC_SCLN, KC_QUOT,\
+      MY_LCTL,    KC_A,    KC_S,    KC_D,    KC_F,    KC_G,                         KC_H,    KC_J,    KC_K,    KC_L, JP_SCLN, JP_COLN,\
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
-      KC_LSFT,    KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,                         KC_N,    KC_M, KC_COMM,  KC_DOT, KC_SLSH, KC_RSFT,\
+      KC_LSFT,    KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,                         KC_N,    KC_M, JP_COMM,  JP_DOT, KC_MINS, JP_SLSH,\
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
-                                          KC_LGUI,   LOWER,  KC_SPC,     KC_ENT,  RAISE,  KC_RALT \
+                                          ALT_ESC,  LOW_MH,  KC_SPC,     KC_ENT, RAI_HK,  KC_RSFT \
                                       //`--------------------------'  `--------------------------'
 
+  ),
+
+  [_RAISE] = LAYOUT( \
+  //,-----------------------------------------------------.                    ,-----------------------------------------------------.
+      _______, JP_EXLM,  JP_DQT, JP_HASH,  JP_DLR, JP_PERC,                      JP_AMPR, JP_QUOT, JP_LPRN, JP_RPRN, JP_PIPE, _______,\
+  //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
+      _______,    KC_1,    KC_2,    KC_3,    KC_4,    KC_5,                         KC_6,    KC_7,    KC_8,    KC_9,    KC_0, JP_TILD,\
+  //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
+      _______,  JP_GRV, JP_CIRC,   JP_AT, JP_LBRC, JP_LCBR,                      JP_RCBR, JP_RBRC, JP_UNDS,  JP_DOT, JP_BSLS, JP_QUES,\
+  //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
+                                          _______, _______, _______,    _______, _______, _______ \
+                                      //`--------------------------'  `--------------------------'
   ),
 
   [_LOWER] = LAYOUT( \
   //,-----------------------------------------------------.                    ,-----------------------------------------------------.
-       KC_ESC,    KC_1,    KC_2,    KC_3,    KC_4,    KC_5,                         KC_6,    KC_7,    KC_8,    KC_9,    KC_0, KC_BSPC,\
+      _______,   KC_F1,   KC_F2,   KC_F3,   KC_F4, XXXXXXX,                      XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,  KC_DEL, \
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
-      KC_LCTL, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                      KC_LEFT, KC_DOWN,   KC_UP,KC_RIGHT, XXXXXXX, XXXXXXX,\
+      _______,   KC_F5,   KC_F6,   KC_F7,   KC_F8, XXXXXXX,                      XXXXXXX, XXXXXXX, XXXXXXX,   KC_UP, XXXXXXX, XXXXXXX, \
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
-      KC_LSFT, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                      XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,\
+      _______,   KC_F9,  KC_F10,  KC_F11,  KC_F12, XXXXXXX,                      XXXXXXX, XXXXXXX, KC_LEFT, KC_DOWN, KC_RGHT, XXXXXXX, \
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
-                                          KC_LGUI,   LOWER,  KC_SPC,     KC_ENT,   RAISE, KC_RALT \
+                                          _______, _______, _______,    _______, _______, _______ \
                                       //`--------------------------'  `--------------------------'
     ),
 
-  [_RAISE] = LAYOUT( \
-  //,-----------------------------------------------------.                    ,-----------------------------------------------------.
-       KC_ESC, KC_EXLM,   KC_AT, KC_HASH,  KC_DLR, KC_PERC,                      KC_CIRC, KC_AMPR, KC_ASTR, KC_LPRN, KC_RPRN, KC_BSPC,\
-  //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
-      KC_LCTL, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                      KC_MINS,  KC_EQL, KC_LCBR, KC_RCBR, KC_PIPE,  KC_GRV,\
-  //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
-      KC_LSFT, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                      KC_UNDS, KC_PLUS, KC_LBRC, KC_RBRC, KC_BSLS, KC_TILD,\
-  //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
-                                          KC_LGUI,   LOWER,  KC_SPC,     KC_ENT,   RAISE, KC_RALT \
-                                      //`--------------------------'  `--------------------------'
-  ),
-
   [_ADJUST] = LAYOUT( \
   //,-----------------------------------------------------.                    ,-----------------------------------------------------.
-        RESET,  RGBRST, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                      XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,\
+    G(KC_TAB), _______, _______, G(KC_E), _______, _______,                       KC_INS, JP_ZHTG, JP_KANA, _______, _______,   RESET, \
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
-      RGB_TOG, RGB_HUI, RGB_SAI, RGB_VAI, XXXXXXX, XXXXXXX,                      XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,\
+      _______, G(KC_A), _______, G(KC_D), _______, _______,                      MY_CAPS, KC_PSCR, _______, KC_PGUP, _______,   PANIC, \
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
-      RGB_MOD, RGB_HUD, RGB_SAD, RGB_VAD, XXXXXXX, XXXXXXX,                      XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,\
+      _______, KC_LWIN, G(KC_X), _______, G(KC_V), _______,                      WINPSCR, WINSFTS, KC_HOME, KC_PGDN,  KC_END, _______, \
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
-                                          KC_LGUI,   LOWER,  KC_SPC,     KC_ENT,   RAISE, KC_RALT \
+                                          _______, _______, _______,    _______, _______, _______ \
                                       //`--------------------------'  `--------------------------'
   )
 };
@@ -155,6 +172,10 @@ void iota_gfx_task_user(void) {
 }
 #endif//SSD1306OLED
 
+layer_state_t layer_state_set_user(layer_state_t state) {
+  return update_tri_layer_state(state, _LOWER, _RAISE, _ADJUST);
+}
+
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   if (record->event.pressed) {
 #ifdef SSD1306OLED
@@ -164,36 +185,36 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   }
 
   switch (keycode) {
-    case QWERTY:
-      if (record->event.pressed) {
-        persistent_default_layer_set(1UL<<_QWERTY);
-      }
-      return false;
-    case LOWER:
-      if (record->event.pressed) {
-        layer_on(_LOWER);
-        update_tri_layer_RGB(_LOWER, _RAISE, _ADJUST);
-      } else {
-        layer_off(_LOWER);
-        update_tri_layer_RGB(_LOWER, _RAISE, _ADJUST);
-      }
-      return false;
-    case RAISE:
-      if (record->event.pressed) {
-        layer_on(_RAISE);
-        update_tri_layer_RGB(_LOWER, _RAISE, _ADJUST);
-      } else {
-        layer_off(_RAISE);
-        update_tri_layer_RGB(_LOWER, _RAISE, _ADJUST);
-      }
-      return false;
-    case ADJUST:
-        if (record->event.pressed) {
-          layer_on(_ADJUST);
-        } else {
-          layer_off(_ADJUST);
-        }
-        return false;
+    // case QWERTY:
+    //   if (record->event.pressed) {
+    //     persistent_default_layer_set(1UL<<_QWERTY);
+    //   }
+    //   return false;
+    // case LOWER:
+    //   if (record->event.pressed) {
+    //     layer_on(_LOWER);
+    //     update_tri_layer_RGB(_LOWER, _RAISE, _ADJUST);
+    //   } else {
+    //     layer_off(_LOWER);
+    //     update_tri_layer_RGB(_LOWER, _RAISE, _ADJUST);
+    //   }
+    //   return false;
+    // case RAISE:
+    //   if (record->event.pressed) {
+    //     layer_on(_RAISE);
+    //     update_tri_layer_RGB(_LOWER, _RAISE, _ADJUST);
+    //   } else {
+    //     layer_off(_RAISE);
+    //     update_tri_layer_RGB(_LOWER, _RAISE, _ADJUST);
+    //   }
+    //   return false;
+    // case ADJUST:
+    //     if (record->event.pressed) {
+    //       layer_on(_ADJUST);
+    //     } else {
+    //       layer_off(_ADJUST);
+    //     }
+    //     return false;
     case RGB_MOD:
       #ifdef RGBLIGHT_ENABLE
         if (record->event.pressed) {

@@ -119,7 +119,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 // clang-format on
 
 layer_state_t layer_state_set_user(layer_state_t state) {
-  return update_tri_layer_state(state, _LOWER, _RAISE, _ADJUST);
+  const layer_state_t t = update_tri_layer_state(state, _LOWER, _RAISE, _ADJUST);
+  board_set_led_by_index(1, LED_YELLOW, get_highest_layer(t) == _NUMPAD);
+  return t;
 }
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
@@ -128,7 +130,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
 bool led_update_user(led_t led_state) {
     board_set_led_by_index(0, LED_YELLOW, led_state.caps_lock);
-    board_set_led_by_index(1, LED_YELLOW, led_state.scroll_lock);
+    //board_set_led_by_index(1, LED_YELLOW, led_state.scroll_lock);
 
     return false;
 }

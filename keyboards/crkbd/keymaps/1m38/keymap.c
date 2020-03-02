@@ -8,6 +8,12 @@ extern rgblight_config_t rgblight_config;
 
 extern uint8_t is_master;
 
+// Tap Dance declarations
+enum td_keycodes {
+  TD_LOWER_LANG
+};
+#define TD_LowLG TD(TD_LOWER_LANG)    // ホールドでLower, タップで無変換, ダブルタップで変換
+
 // Each layer gets a name for readability, which is then used in the keymap matrix below.
 // The underscores don't mean anything - you can have a layer called STUFF or any other name.
 // Layer names don't all need to be of the same length, obviously, and you can also skip them
@@ -34,8 +40,7 @@ enum custom_keycodes {
   #define MY_CAPS KC_CAPS
 #endif
 
-#define LOW_MH LT(_LOWER, KC_MHEN)  // タップで無変換, ホールドでLOWER
-#define RAI_HK LT(_RAISE, KC_HENK)  // タップで変換, ホールドでRAISE
+#define RAISE  MO(_RAISE)
 #define ALT_ESC ALT_T(KC_ESC)       // タップでEsc, ホールドでAlt
 #define WINPSCR G(KC_PSCR)          // Win + PrtScr
 #define WINSFTS G(S(KC_S))          // Win + Shift + S
@@ -56,7 +61,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
       KC_LSFT,    KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,                         KC_N,    KC_M, JP_COMM,  JP_DOT, KC_MINS, JP_SLSH,\
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
-                                          ALT_ESC,  LOW_MH,  KC_SPC,     KC_ENT, RAI_HK,  KC_RSFT \
+                                          ALT_ESC,TD_LowLG,  KC_SPC,     KC_ENT,   RAISE,  KC_RSFT \
                                       //`--------------------------'  `--------------------------'
 
   ),
@@ -236,3 +241,72 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   }
   return true;
 }
+
+// Tap Dance definitions
+typedef enum {
+  SINGLE_TAP,
+  SINGLE_HOLD,
+  DOUBLE_TAP,
+  TD_STATE_UNKNOWN
+} td_state_t;
+
+static td_state_t td_state;
+
+td_state_t cur_dance(qk_tap_dance_state_t *state)
+{
+  if (state->count == 1) {
+    if (!state->pressed) { return SINGLE_TAP; }
+    return SINGLE_HOLD;
+  }
+  if (state->count == 2) { return DOUBLE_TAP; }
+  return TD_STATE_UNKNOWN;
+}
+
+void lower_lang_finished (qk_tap_dance_state_t *state, void *user_data)
+{
+  td_state = cur_dance(state);
+  switch (td_state)
+  {
+    case SINGLE_TAP:
+      // Lowerレイヤにいるなら抜ける
+      if (IS_LAYER_ON(_LOWER)) layer_off(_LOWER);
+      register_code(KC_MHEN);   // 無変換
+      break;
+    case SINGLE_HOLD:
+      layer_on(_LOWER);   // Lowerレイヤに入る
+      break;
+    case DOUBLE_TAP:
+      // Lowerレイヤにいるなら抜ける
+      if (IS_LAYER_ON(_LOWER)) layer_off(_LOWER);
+      register_code(KC_HENK);   // 変換
+      break;
+    default:
+      // Lowerレイヤにいるなら抜ける
+      if (IS_LAYER_ON(_LOWER)) layer_off(_LOWER);
+      break;
+  }
+}
+
+void lower_lang_reset (qk_tap_dance_state_t *state, void *user_data)
+{
+  switch (td_state)
+  {
+    case SINGLE_TAP:
+      unregister_code(KC_MHEN);   // 無変換をリリース
+      break;
+    case SINGLE_HOLD:
+      layer_off(_LOWER);          // lowerから抜ける
+      break;
+    case DOUBLE_TAP:
+      unregister_code(KC_HENK);   // 変換をリリース
+      break;
+    default:
+      break;
+  }
+}
+
+//Tap Dance Definitions
+qk_tap_dance_action_t tap_dance_actions[] = {
+  
+  [TD_LOWER_LANG]  = ACTION_TAP_DANCE_FN_ADVANCED(NULL, lower_lang_finished, lower_lang_reset)
+};

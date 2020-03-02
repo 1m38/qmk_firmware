@@ -25,6 +25,7 @@ enum layer_number
   _QWERTY = 0,
   _RAISE,
   _LOWER,
+  _NUMPAD,
   _ADJUST
 };
 
@@ -34,6 +35,7 @@ enum custom_keycodes
   QWERTY = SAFE_RANGE,
   RAISE,
   LOWER,
+  NUMPAD,
   ADJUST
 };
 
@@ -62,7 +64,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //|--------+--------+--------+--------+--------+--------|        |--------+--------+--------+--------+--------+--------|
       KC_LSFT,    KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,             KC_N,    KC_M, JP_COMM,  JP_DOT, KC_MINS, JP_SLSH,\
   //|--------+--------+--------+--------+--------+--------|        |--------+--------+--------+--------+--------+--------|
-      XXXXXXX, XXXXXXX, XXXXXXX, ALT_ESC,  LOW_MH,  KC_SPC,           KC_ENT, RAI_HK,  KC_RSFT, XXXXXXX, XXXXXXX, XXXXXXX \
+      XXXXXXX, XXXXXXX, XXXXXXX, ALT_ESC,  LOW_MH,  KC_SPC,           KC_ENT, RAI_HK,  KC_RSFT, XXXXXXX, XXXXXXX, TG(_NUMPAD) \
   //|-----------------------------------------------------'        `-----------------------------------------------------'
   ),
 
@@ -87,6 +89,18 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
       _______,   KC_F9,  KC_F10,  KC_F11,  KC_F12, XXXXXXX,          XXXXXXX, KC_LEFT, KC_DOWN, KC_RGHT, XXXXXXX, XXXXXXX,\
   //|--------+--------+--------+--------+--------+--------|        |--------+--------+--------+--------+--------+--------|
       XXXXXXX, XXXXXXX, XXXXXXX, _______, _______, _______,          _______, _______, _______, XXXXXXX, XXXXXXX, XXXXXXX \
+  //|-----------------------------------------------------'        `-----------------------------------------------------'
+    ),
+
+  [_NUMPAD] = LAYOUT( \
+  //,-----------------------------------------------------.        ,-----------------------------------------------------.
+      _______, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, KC_NLCK,          XXXXXXX, KC_KP_7, KC_KP_8, KC_KP_9, KC_PAST, KC_BSPC,\
+  //|--------+--------+--------+--------+--------+--------|        |--------+--------+--------+--------+--------+--------|
+      _______, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,          XXXXXXX, KC_KP_4, KC_KP_5, KC_KP_6, KC_PPLS, XXXXXXX,\
+  //|--------+--------+--------+--------+--------+--------|        |--------+--------+--------+--------+--------+--------|
+      _______, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,          XXXXXXX, KC_KP_1, KC_KP_2, KC_KP_3, KC_PMNS, KC_PSLS,\
+  //|--------+--------+--------+--------+--------+--------|        |--------+--------+--------+--------+--------+--------|
+      XXXXXXX, XXXXXXX, XXXXXXX, _______, _______, _______,          KC_PENT, _______, KC_KP_0, KC_PDOT, XXXXXXX, TG(_NUMPAD) \
   //|-----------------------------------------------------'        `-----------------------------------------------------'
     ),
 

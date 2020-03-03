@@ -33,10 +33,6 @@ enum layer_number
 enum custom_keycodes
 {
   QWERTY = SAFE_RANGE,
-  RAISE,
-  LOWER,
-  NUMPAD,
-  ADJUST
 };
 
 #if SWAP_CAPS
@@ -48,7 +44,8 @@ enum custom_keycodes
 #endif
 
 #define LOW_MH LT(_LOWER, KC_MHEN)  // タップで無変換, ホールドでLOWER
-#define RAI_HK LT(_RAISE, KC_HENK)  // タップで変換, ホールドでRAISE
+#define RAISE  MO(_RAISE)
+#define NUMPAD TG(_NUMPAD)
 #define ALT_ESC ALT_T(KC_ESC)       // タップでEsc, ホールドでAlt
 #define WINPSCR G(KC_PSCR)          // Win + PrtScr
 #define WINSFTS G(S(KC_S))          // Win + Shift + S
@@ -64,7 +61,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //|--------+--------+--------+--------+--------+--------|        |--------+--------+--------+--------+--------+--------|
       KC_LSFT,    KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,             KC_N,    KC_M, JP_COMM,  JP_DOT, KC_MINS, JP_SLSH,\
   //|--------+--------+--------+--------+--------+--------|        |--------+--------+--------+--------+--------+--------|
-      XXXXXXX, XXXXXXX, XXXXXXX, ALT_ESC,  LOW_MH,  KC_SPC,           KC_ENT, RAI_HK,  KC_RSFT, KC_DOWN,   KC_UP, TG(_NUMPAD) \
+      XXXXXXX, XXXXXXX, XXXXXXX, ALT_ESC,  LOW_MH,  KC_SPC,           KC_ENT,   RAISE, KC_RSFT, KC_DOWN,   KC_UP,  NUMPAD \
   //|-----------------------------------------------------'        `-----------------------------------------------------'
   ),
 
@@ -82,9 +79,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
   [_LOWER] = LAYOUT( \
   //,-----------------------------------------------------.        ,-----------------------------------------------------.
-      _______,   KC_F1,   KC_F2,   KC_F3,   KC_F4, XXXXXXX,          XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,  KC_DEL,\
+      _______,   KC_F1,   KC_F2,   KC_F3,   KC_F4,  NUMPAD,          XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,  KC_DEL,\
   //|--------+--------+--------+--------+--------+--------|        |--------+--------+--------+--------+--------+--------|
-      _______,   KC_F5,   KC_F6,   KC_F7,   KC_F8, XXXXXXX,          XXXXXXX, XXXXXXX,   KC_UP, XXXXXXX, XXXXXXX, XXXXXXX,\
+      _______,   KC_F5,   KC_F6,   KC_F7,   KC_F8, KC_HENK,          XXXXXXX, XXXXXXX,   KC_UP, XXXXXXX, XXXXXXX, XXXXXXX,\
   //|--------+--------+--------+--------+--------+--------|        |--------+--------+--------+--------+--------+--------|
       _______,   KC_F9,  KC_F10,  KC_F11,  KC_F12, XXXXXXX,          XXXXXXX, KC_LEFT, KC_DOWN, KC_RGHT, XXXXXXX, XXXXXXX,\
   //|--------+--------+--------+--------+--------+--------|        |--------+--------+--------+--------+--------+--------|
@@ -94,13 +91,13 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
   [_NUMPAD] = LAYOUT( \
   //,-----------------------------------------------------.        ,-----------------------------------------------------.
-      _______, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, KC_NLCK,          XXXXXXX, KC_KP_7, KC_KP_8, KC_KP_9, KC_PAST, KC_BSPC,\
+      _______, KC_NLCK, XXXXXXX, XXXXXXX, XXXXXXX,  NUMPAD,          XXXXXXX, KC_KP_7, KC_KP_8, KC_KP_9, KC_PAST, KC_BSPC,\
   //|--------+--------+--------+--------+--------+--------|        |--------+--------+--------+--------+--------+--------|
       _______, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,          XXXXXXX, KC_KP_4, KC_KP_5, KC_KP_6, KC_PPLS, XXXXXXX,\
   //|--------+--------+--------+--------+--------+--------|        |--------+--------+--------+--------+--------+--------|
-      _______, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,          XXXXXXX, KC_KP_1, KC_KP_2, KC_KP_3, KC_PMNS, KC_PSLS,\
+      _______, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,          KC_PDOT, KC_KP_1, KC_KP_2, KC_KP_3, KC_PMNS, KC_PSLS,\
   //|--------+--------+--------+--------+--------+--------|        |--------+--------+--------+--------+--------+--------|
-      XXXXXXX, XXXXXXX, XXXXXXX, _______, _______, _______,          KC_PENT, _______, KC_KP_0, KC_PDOT, XXXXXXX, TG(_NUMPAD) \
+      XXXXXXX, XXXXXXX, XXXXXXX, _______, _______, _______,          KC_PENT, _______, KC_KP_0, XXXXXXX, XXXXXXX,  NUMPAD \
   //|-----------------------------------------------------'        `-----------------------------------------------------'
     ),
 

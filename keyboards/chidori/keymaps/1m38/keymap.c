@@ -23,6 +23,7 @@ extern keymap_config_t keymap_config;
 enum layer_number
 {
   _QWERTY = 0,
+  _EUCALYN,
   _RAISE,
   _LOWER,
   _NUMPAD,
@@ -33,6 +34,7 @@ enum layer_number
 enum custom_keycodes
 {
   QWERTY = SAFE_RANGE,
+  EUCALYN
 };
 
 #if SWAP_CAPS
@@ -55,13 +57,25 @@ enum custom_keycodes
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   [_QWERTY] = LAYOUT( \
   //,-----------------------------------------------------.        ,-----------------------------------------------------.
-       KC_TAB,    KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,             KC_Y,    KC_U,    KC_I,    KC_O,   KC_P,  KC_BSPC,\
+       KC_TAB,    KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,             KC_Y,    KC_U,    KC_I,    KC_O,    KC_P, KC_BSPC,\
   //|--------+--------+--------+--------+--------+--------|        |--------+--------+--------+--------+--------+--------|
       MY_LCTL,    KC_A,    KC_S,    KC_D,    KC_F,    KC_G,             KC_H,    KC_J,    KC_K,    KC_L, JP_SCLN, JP_COLN,\
   //|--------+--------+--------+--------+--------+--------|        |--------+--------+--------+--------+--------+--------|
       KC_LSFT,    KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,             KC_N,    KC_M, JP_COMM,  JP_DOT, KC_MINS, JP_SLSH,\
   //|--------+--------+--------+--------+--------+--------|        |--------+--------+--------+--------+--------+--------|
       XXXXXXX, XXXXXXX, XXXXXXX, ALT_ESC,  LOW_MH,  KC_SPC,           KC_ENT,   RAISE, KC_RSFT, KC_DOWN,   KC_UP,  NUMPAD \
+  //|-----------------------------------------------------'        `-----------------------------------------------------'
+  ),
+
+  [_EUCALYN] = LAYOUT( \
+  //,-----------------------------------------------------.        ,-----------------------------------------------------.
+      _______,    KC_Q,    KC_W, JP_COMM,  JP_DOT, JP_SCLN,             KC_M,    KC_R,    KC_D,    KC_Y,    KC_P, _______,\
+  //|--------+--------+--------+--------+--------+--------|        |--------+--------+--------+--------+--------+--------|
+      _______,    KC_A,    KC_O,    KC_E,    KC_I,    KC_U,             KC_G,    KC_T,    KC_K,    KC_S,    KC_N, _______,\
+  //|--------+--------+--------+--------+--------+--------|        |--------+--------+--------+--------+--------+--------|
+      _______,    KC_Z,    KC_X,    KC_C,    KC_V,    KC_F,             KC_B,    KC_H,    KC_J,    KC_L, KC_MINS, _______,\
+  //|--------+--------+--------+--------+--------+--------|        |--------+--------+--------+--------+--------+--------|
+      _______, _______, _______, _______, _______, _______,          _______, _______, _______, _______, _______, _______ \
   //|-----------------------------------------------------'        `-----------------------------------------------------'
   ),
 
@@ -107,7 +121,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //|--------+--------+--------+--------+--------+--------|        |--------+--------+--------+--------+--------+--------|
       _______, G(KC_A), _______, G(KC_D), _______, _______,       S(MY_CAPS), KC_PSCR, KC_PGUP, _______, _______,   PANIC,\
   //|--------+--------+--------+--------+--------+--------|        |--------+--------+--------+--------+--------+--------|
-      _______, KC_LWIN, G(KC_X), _______, G(KC_V), _______,          _______, KC_HOME, KC_PGDN,  KC_END, _______, _______,\
+      _______, KC_LWIN, G(KC_X), _______, G(KC_V), _______,          _______, KC_HOME, KC_PGDN,  KC_END,  QWERTY, EUCALYN,\
   //|--------+--------+--------+--------+--------+--------|        |--------+--------+--------+--------+--------+--------|
       XXXXXXX, XXXXXXX, XXXXXXX, _______, _______, _______,          _______, _______, _______, XXXXXXX, XXXXXXX, XXXXXXX \
   //|-----------------------------------------------------'        `-----------------------------------------------------'
@@ -115,19 +129,38 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 };
 // clang-format on
 
+void persistent_default_layer_set(uint16_t default_layer) {
+  eeconfig_update_default_layer(default_layer);
+  default_layer_set(default_layer);
+}
+
 layer_state_t layer_state_set_user(layer_state_t state) {
   const layer_state_t t = update_tri_layer_state(state, _LOWER, _RAISE, _ADJUST);
-  board_set_led_by_index(1, LED_YELLOW, get_highest_layer(t) == _NUMPAD);
+  
   return t;
 }
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
-    return true;
+  switch (keycode) {
+    case QWERTY:
+      if (record->event.pressed) {
+        persistent_default_layer_set(1UL<<_QWERTY);
+      }
+      return false;
+    case EUCALYN:
+      if (record->event.pressed) {
+        persistent_default_layer_set(1UL<<_EUCALYN);
+      }
+      return false;
+  }
+  return true;
 }
 
 bool led_update_user(led_t led_state) {
-    board_set_led_by_index(0, LED_YELLOW, led_state.caps_lock);
-    //board_set_led_by_index(1, LED_YELLOW, led_state.scroll_lock);
+  // Left Yellow: default layer (Qwerty: off, Eucalyn: on)
+  board_set_led_by_index(0, LED_YELLOW, (default_layer_state & (1U<<_EUCALYN)));
+  // Right Yellow: NUMPAD layer
+  board_set_led_by_index(1, LED_YELLOW, (layer_state & (1U<<_NUMPAD)));
 
-    return false;
+  return false;
 }

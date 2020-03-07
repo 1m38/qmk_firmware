@@ -167,6 +167,8 @@ const char *read_host_led_state(void);
 // const char *read_timelog(void);
 void set_uptime(void);
 const char *read_uptime(void);
+void count_up(void);
+const char *read_count(void);
 
 
 void matrix_scan_user(void) {
@@ -182,8 +184,9 @@ void matrix_render_user(struct CharacterMatrix *matrix) {
     //matrix_write_ln(matrix, read_mode_icon(keymap_config.swap_lalt_lgui));
     matrix_write_ln(matrix, read_host_led_state());
     //matrix_write_ln(matrix, read_timelog());
+    matrix_write_ln(matrix, read_count());
     set_uptime();
-    matrix_write_ln(matrix, read_uptime());
+    matrix_write(matrix, read_uptime());
   } else {
     matrix_write(matrix, read_logo());
   }
@@ -212,6 +215,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   if (record->event.pressed) {
 #ifdef SSD1306OLED
     // set_keylog(keycode, record);
+    count_up();
 #endif
     // set_timelog();
   }

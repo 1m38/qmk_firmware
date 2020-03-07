@@ -165,6 +165,9 @@ const char *read_logo(void);
 const char *read_host_led_state(void);
 // void set_timelog(void);
 // const char *read_timelog(void);
+void set_uptime(void);
+const char *read_uptime(void);
+
 
 void matrix_scan_user(void) {
    iota_gfx_task();
@@ -179,6 +182,8 @@ void matrix_render_user(struct CharacterMatrix *matrix) {
     //matrix_write_ln(matrix, read_mode_icon(keymap_config.swap_lalt_lgui));
     matrix_write_ln(matrix, read_host_led_state());
     //matrix_write_ln(matrix, read_timelog());
+    set_uptime();
+    matrix_write_ln(matrix, read_uptime());
   } else {
     matrix_write(matrix, read_logo());
   }

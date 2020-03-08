@@ -164,3 +164,42 @@ bool led_update_user(led_t led_state) {
 
   return false;
 }
+
+#ifdef OLED_DRIVER_ENABLE
+
+#include <stdio.h>
+
+const char *read_layer_state(void) {
+  char *base_layer;
+  switch (default_layer_state)
+  {
+    case 0:
+    case (1U<<_QWERTY):
+      base_layer = "Qwerty";
+      break;
+    case (1U<<_EUCALYN):
+      base_layer = "Eucalyn";
+      break;
+    default:
+      base_layer = "Undef";
+      break;
+  }
+
+  char *layer_name;
+  if      (layer_state & (1U<<_ADJUST))   layer_name = "Adjust";
+  else if (layer_state & (1U<<_NUMPAD))   layer_name = "NumPad";
+  else if (layer_state & (1U<<_LOWER))    layer_name = "Lower";
+  else if (layer_state & (1U<<_RAISE))    layer_name = "Raise";
+  else if (layer_state == 0)              layer_name = base_layer;
+  else                                    layer_name = "Undef";
+
+  static char layer_state_str[24];
+  // snprintf(layer_state_str, sizeof(layer_state_str), "Layer: %s %ld %ld", layer_name, layer_state, default_layer_state);
+  snprintf(layer_state_str, sizeof(layer_state_str), "Layer: %s", layer_name);
+  return layer_state_str;
+}
+
+void oled_task_user(void) {
+  oled_write_ln(read_layer_state(), false);
+}
+#endif

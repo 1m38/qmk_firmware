@@ -18,6 +18,18 @@
 #include "board.h"
 #include "keymap_jp.h"
 
+#ifdef OLED_DRIVER_ENABLE
+
+#include <stdio.h>
+
+const char *read_host_led_state(void);
+void set_uptime(void);
+const char *read_uptime(void);
+void count_up(void);
+const char *read_count(void);
+
+#endif
+
 extern keymap_config_t keymap_config;
 
 enum layer_number
@@ -141,6 +153,11 @@ layer_state_t layer_state_set_user(layer_state_t state) {
 }
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+#ifdef OLED_DRIVER_ENABLE
+  if (record->event.pressed) {
+    count_up();
+  }
+#endif
   switch (keycode) {
     case QWERTY:
       if (record->event.pressed) {
@@ -166,8 +183,6 @@ bool led_update_user(led_t led_state) {
 }
 
 #ifdef OLED_DRIVER_ENABLE
-
-#include <stdio.h>
 
 const char *read_layer_state(void) {
   char *base_layer;
@@ -200,6 +215,12 @@ const char *read_layer_state(void) {
 }
 
 void oled_task_user(void) {
+  // If you want to change the display of OLED, you need to change here
   oled_write_ln(read_layer_state(), false);
+  //oled_write_ln(read_keylog(), false);
+  oled_write_ln(read_host_led_state(), false);
+  oled_write_ln(read_count(), false);
+  set_uptime();
+  oled_write(read_uptime(), false);
 }
 #endif

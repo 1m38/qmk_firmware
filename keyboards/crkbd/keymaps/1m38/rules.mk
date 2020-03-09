@@ -3,9 +3,6 @@
 SRC +=  ./lib/glcdfont.c \
         ./lib/rgb_state_reader.c \
         ./lib/logo_reader.c \
-        ./lib/host_led_state_reader.c \
-        ./lib/uptime_reader.c \
-        ./lib/typecount_reader.c \
         # ./lib/keylogger.c \
         # ./lib/mode_icon_reader.c \
         # ./lib/timelogger.c \

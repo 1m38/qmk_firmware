@@ -35,8 +35,10 @@ extern keymap_config_t keymap_config;
 enum layer_number
 {
   _QWERTY = 0,
+  _QWERTY_US,
   _EUCALYN,
   _RAISE,
+  _RAISE_US,
   _LOWER,
   _NUMPAD,
   _ADJUST
@@ -50,11 +52,17 @@ const char *print_layer(int layer_number)
     case _QWERTY:
       snprintf(layer_str, sizeof(layer_str), "%s", "Qwerty");
       return layer_str;
+    case _QWERTY_US:
+      snprintf(layer_str, sizeof(layer_str), "%s", "Qwerty(US)");
+      return layer_str;
     case _EUCALYN:
       snprintf(layer_str, sizeof(layer_str), "%s", "Eucalyn");
       return layer_str;
     case _RAISE:
       snprintf(layer_str, sizeof(layer_str), "%s", "Raise");
+      return layer_str;
+    case _RAISE_US:
+      snprintf(layer_str, sizeof(layer_str), "%s", "Raise(US)");
       return layer_str;
     case _LOWER:
       snprintf(layer_str, sizeof(layer_str), "%s", "Lower");
@@ -75,7 +83,8 @@ const char *print_layer(int layer_number)
 enum custom_keycodes
 {
   QWERTY = SAFE_RANGE,
-  EUCALYN
+  EUCALYN,
+  QWER_US,
 };
 
 #if SWAP_CAPS
@@ -88,6 +97,8 @@ enum custom_keycodes
 
 #define LOW_MH LT(_LOWER, KC_MHEN)  // タップで無変換, ホールドでLOWER
 #define RAI_HK LT(_RAISE, KC_HENK)  // タップで変換, ホールドでRAISE
+#define LOW_MHU LT(_LOWER, KC_F15)  // タップで無変換(F15), ホールドでLOWER
+#define RAI_HKU LT(_RAISE_US, KC_F16)  // タップで変換(F16), ホールドでRAISE
 #define NUMPAD TG(_NUMPAD)
 #define ALT_ESC ALT_T(KC_ESC)       // タップでEsc, ホールドでAlt
 #define WINPSCR G(KC_PSCR)          // Win + PrtScr
@@ -108,6 +119,18 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //|-----------------------------------------------------'        `-----------------------------------------------------'
   ),
 
+  [_QWERTY_US] = LAYOUT( \
+  //,-----------------------------------------------------.        ,-----------------------------------------------------.
+       KC_TAB,    KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,             KC_Y,    KC_U,    KC_I,    KC_O,    KC_P, KC_BSPC,\
+  //|--------+--------+--------+--------+--------+--------|        |--------+--------+--------+--------+--------+--------|
+      MY_LCTL,    KC_A,    KC_S,    KC_D,    KC_F,    KC_G,             KC_H,    KC_J,    KC_K,    KC_L, KC_SCLN,  KC_EQL,\
+  //|--------+--------+--------+--------+--------+--------|        |--------+--------+--------+--------+--------+--------|
+      KC_LSFT,    KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,             KC_N,    KC_M, KC_COMM,  KC_DOT, KC_MINS, KC_SLSH,\
+  //|--------+--------+--------+--------+--------+--------|        |--------+--------+--------+--------+--------+--------|
+      XXXXXXX, XXXXXXX, XXXXXXX, ALT_ESC, LOW_MHU,  KC_SPC,           KC_ENT, RAI_HKU, KC_RSFT, KC_DOWN,   KC_UP,  NUMPAD \
+  //|-----------------------------------------------------'        `-----------------------------------------------------'
+  ),
+
   [_EUCALYN] = LAYOUT( \
   //,-----------------------------------------------------.        ,-----------------------------------------------------.
       _______,    KC_Q,    KC_W, JP_COMM,  JP_DOT, JP_SCLN,             KC_M,    KC_R,    KC_D,    KC_Y,    KC_P, _______,\
@@ -116,7 +139,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //|--------+--------+--------+--------+--------+--------|        |--------+--------+--------+--------+--------+--------|
       _______,    KC_Z,    KC_X,    KC_C,    KC_V,    KC_F,             KC_B,    KC_H,    KC_J,    KC_L, KC_MINS, _______,\
   //|--------+--------+--------+--------+--------+--------|        |--------+--------+--------+--------+--------+--------|
-      _______, _______, _______, _______, _______, _______,          _______, _______, _______, _______, _______, _______ \
+      _______, _______, _______, _______,  LOW_MH, _______,          _______,  RAI_HK, _______, _______, _______, _______ \
   //|-----------------------------------------------------'        `-----------------------------------------------------'
   ),
 
@@ -127,6 +150,18 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
       _______,    KC_1,    KC_2,    KC_3,    KC_4,    KC_5,             KC_6,    KC_7,    KC_8,    KC_9,    KC_0, JP_TILD,\
   //|--------+--------+--------+--------+--------+--------|        |--------+--------+--------+--------+--------+--------|
       _______, JP_PIPE, JP_CIRC,   JP_AT, JP_LBRC, JP_LCBR,          JP_RCBR, JP_RBRC, JP_UNDS,  JP_DOT, JP_BSLS, JP_QUES,\
+  //|--------+--------+--------+--------+--------+--------|        |--------+--------+--------+--------+--------+--------|
+      XXXXXXX, XXXXXXX, XXXXXXX, _______, _______, _______,          _______, _______, _______, XXXXXXX, XXXXXXX, XXXXXXX \
+  //|-----------------------------------------------------'        `-----------------------------------------------------'
+  ),
+
+  [_RAISE_US] = LAYOUT( \
+  //,-----------------------------------------------------.        ,-----------------------------------------------------.
+      _______, KC_EXLM,  KC_DQT, KC_HASH,  KC_DLR, KC_PERC,          KC_AMPR, KC_QUOT, KC_LPRN, KC_RPRN,  KC_GRV, _______,\
+  //|--------+--------+--------+--------+--------+--------|        |--------+--------+--------+--------+--------+--------|
+      _______,    KC_1,    KC_2,    KC_3,    KC_4,    KC_5,             KC_6,    KC_7,    KC_8,    KC_9,    KC_0, KC_TILD,\
+  //|--------+--------+--------+--------+--------+--------|        |--------+--------+--------+--------+--------+--------|
+      _______, KC_PIPE, KC_CIRC,   KC_AT, KC_LBRC, KC_LCBR,          KC_RCBR, KC_RBRC, KC_UNDS,  KC_DOT, KC_BSLS, KC_ASTR,\
   //|--------+--------+--------+--------+--------+--------|        |--------+--------+--------+--------+--------+--------|
       XXXXXXX, XXXXXXX, XXXXXXX, _______, _______, _______,          _______, _______, _______, XXXXXXX, XXXXXXX, XXXXXXX \
   //|-----------------------------------------------------'        `-----------------------------------------------------'
@@ -160,9 +195,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //,-----------------------------------------------------.        ,-----------------------------------------------------.
     G(KC_TAB), _______, _______, G(KC_E), G(KC_R), _______,           KC_INS, WINSFTS, WINPSCR, JP_ZHTG, JP_KANA,   RESET,\
   //|--------+--------+--------+--------+--------+--------|        |--------+--------+--------+--------+--------+--------|
-      _______, G(KC_A), _______, G(KC_D), _______, _______,       S(MY_CAPS), KC_PSCR, KC_PGUP, _______, _______,   PANIC,\
+      _______, G(KC_A), _______, G(KC_D), _______, _______,       S(MY_CAPS), KC_PSCR, _______, _______, _______,   PANIC,\
   //|--------+--------+--------+--------+--------+--------|        |--------+--------+--------+--------+--------+--------|
-      _______, KC_LWIN, G(KC_X), _______, G(KC_V), _______,          _______, KC_HOME, KC_PGDN,  KC_END,  QWERTY, EUCALYN,\
+      _______, KC_LWIN, G(KC_X), _______, G(KC_V), _______,          _______, _______, _______, QWER_US,  QWERTY, EUCALYN,\
   //|--------+--------+--------+--------+--------+--------|        |--------+--------+--------+--------+--------+--------|
       XXXXXXX, XXXXXXX, XXXXXXX, _______, _______, _______,          _______, _______, _______, XXXXXXX, XXXXXXX, XXXXXXX \
   //|-----------------------------------------------------'        `-----------------------------------------------------'
@@ -176,9 +211,12 @@ void persistent_default_layer_set(uint16_t default_layer) {
 }
 
 layer_state_t layer_state_set_user(layer_state_t state) {
-  const layer_state_t t = update_tri_layer_state(state, _LOWER, _RAISE, _ADJUST);
-  
-  return t;
+  state = update_tri_layer_state(state, _LOWER, _RAISE, _ADJUST);
+  if ((state & (1UL << _ADJUST)) == 0)
+  {
+    state = update_tri_layer_state(state, _LOWER, _RAISE_US, _ADJUST);
+  }
+  return state;
 }
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
@@ -197,6 +235,11 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     case EUCALYN:
       if (record->event.pressed) {
         persistent_default_layer_set(1UL<<_EUCALYN);
+      }
+      return false;
+    case QWER_US:
+      if (record->event.pressed) {
+        persistent_default_layer_set(1UL<<_QWERTY_US);
       }
       return false;
   }

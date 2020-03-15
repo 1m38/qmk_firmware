@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <host.h>
+#include QMK_KEYBOARD_H
 
 char host_led_state_str[24];
 

@@ -22,6 +22,35 @@ enum layer_number
   _ADJUST
 };
 
+const char *print_layer(int layer_number)
+{
+  static char layer_str[24];
+  switch (layer_number)
+  {
+    case _QWERTY:
+      snprintf(layer_str, sizeof(layer_str), "%s", "Qwerty");
+      return layer_str;
+    case _EUCALYN:
+      snprintf(layer_str, sizeof(layer_str), "%s", "Eucalyn");
+      return layer_str;
+    case _RAISE:
+      snprintf(layer_str, sizeof(layer_str), "%s", "Raise");
+      return layer_str;
+    case _LOWER:
+      snprintf(layer_str, sizeof(layer_str), "%s", "Lower");
+      return layer_str;
+    case _NUMPAD:
+      snprintf(layer_str, sizeof(layer_str), "%s", "NumPad");
+      return layer_str;
+    case _ADJUST:
+      snprintf(layer_str, sizeof(layer_str), "%s", "Adjust");
+      return layer_str;
+    default:
+      snprintf(layer_str, sizeof(layer_str), "%s", "Undef");
+      return layer_str;
+  }
+}
+
 enum custom_keycodes {
   QWERTY = SAFE_RANGE,
   EUCALYN,
@@ -277,34 +306,4 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       break;
   }
   return true;
-}
-
-char layer_state_str[24];
-
-const char *read_layer_state(void) {
-  char *base_layer;
-  switch (default_layer_state)
-  {
-    case (1U<<_QWERTY):
-      base_layer = "Qwerty";
-      break;
-    case (1U<<_EUCALYN):
-      base_layer = "Eucalyn";
-      break;
-    default:
-      base_layer = "Undef";
-      break;
-  }
-
-  char *layer_name;
-  if      (layer_state & (1U<<_ADJUST))   layer_name = "Adjust";
-  else if (layer_state & (1U<<_NUMPAD))   layer_name = "NumPad";
-  else if (layer_state & (1U<<_LOWER))    layer_name = "Lower";
-  else if (layer_state & (1U<<_RAISE))    layer_name = "Raise";
-  else if (layer_state == 0)              layer_name = base_layer;
-  else                                    layer_name = "Undef";
-
-  // snprintf(layer_state_str, sizeof(layer_state_str), "Layer: %s %ld", layer_name, layer_state);
-  snprintf(layer_state_str, sizeof(layer_state_str), "Layer: %s", layer_name);
-  return layer_state_str;
 }

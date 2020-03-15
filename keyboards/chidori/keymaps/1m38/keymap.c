@@ -17,17 +17,17 @@
 
 #include "board.h"
 #include "keymap_jp.h"
-
-#ifdef OLED_DRIVER_ENABLE
-
 #include <stdio.h>
 
+#ifdef OLED_DRIVER_ENABLE
+const char *read_layer_state(void);
 const char *read_host_led_state(void);
+const char *read_keylog(void);
+void set_keylog(uint16_t keycode, keyrecord_t *record);
 void set_uptime(void);
 const char *read_uptime(void);
 void count_up(void);
 const char *read_count(void);
-
 #endif
 
 extern keymap_config_t keymap_config;
@@ -41,6 +41,35 @@ enum layer_number
   _NUMPAD,
   _ADJUST
 };
+
+const char *print_layer(int layer_number)
+{
+  static char layer_str[24];
+  switch (layer_number)
+  {
+    case _QWERTY:
+      snprintf(layer_str, sizeof(layer_str), "%s", "Qwerty");
+      return layer_str;
+    case _EUCALYN:
+      snprintf(layer_str, sizeof(layer_str), "%s", "Eucalyn");
+      return layer_str;
+    case _RAISE:
+      snprintf(layer_str, sizeof(layer_str), "%s", "Raise");
+      return layer_str;
+    case _LOWER:
+      snprintf(layer_str, sizeof(layer_str), "%s", "Lower");
+      return layer_str;
+    case _NUMPAD:
+      snprintf(layer_str, sizeof(layer_str), "%s", "NumPad");
+      return layer_str;
+    case _ADJUST:
+      snprintf(layer_str, sizeof(layer_str), "%s", "Adjust");
+      return layer_str;
+    default:
+      snprintf(layer_str, sizeof(layer_str), "%s", "Undef");
+      return layer_str;
+  }
+}
 
 // Defines the keycodes used by our macros in process_record_user
 enum custom_keycodes
@@ -155,6 +184,7 @@ layer_state_t layer_state_set_user(layer_state_t state) {
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 #ifdef OLED_DRIVER_ENABLE
   if (record->event.pressed) {
+    set_keylog(keycode, record);
     count_up();
   }
 #endif
@@ -184,43 +214,13 @@ bool led_update_user(led_t led_state) {
 
 #ifdef OLED_DRIVER_ENABLE
 
-const char *read_layer_state(void) {
-  char *base_layer;
-  switch (default_layer_state)
-  {
-    case 0:
-    case (1U<<_QWERTY):
-      base_layer = "Qwerty";
-      break;
-    case (1U<<_EUCALYN):
-      base_layer = "Eucalyn";
-      break;
-    default:
-      base_layer = "Undef";
-      break;
-  }
-
-  char *layer_name;
-  if      (layer_state & (1U<<_ADJUST))   layer_name = "Adjust";
-  else if (layer_state & (1U<<_NUMPAD))   layer_name = "NumPad";
-  else if (layer_state & (1U<<_LOWER))    layer_name = "Lower";
-  else if (layer_state & (1U<<_RAISE))    layer_name = "Raise";
-  else if (layer_state == 0)              layer_name = base_layer;
-  else                                    layer_name = "Undef";
-
-  static char layer_state_str[24];
-  // snprintf(layer_state_str, sizeof(layer_state_str), "Layer: %s %ld %ld", layer_name, layer_state, default_layer_state);
-  snprintf(layer_state_str, sizeof(layer_state_str), "Layer: %s", layer_name);
-  return layer_state_str;
-}
-
 void oled_task_user(void) {
   // If you want to change the display of OLED, you need to change here
   oled_write_ln(read_layer_state(), false);
-  //oled_write_ln(read_keylog(), false);
+  oled_write_ln(read_keylog(), false);
   oled_write_ln(read_host_led_state(), false);
-  oled_write_ln(read_count(), false);
-  set_uptime();
-  oled_write(read_uptime(), false);
+  oled_write(read_count(), false);
+  //set_uptime();
+  //oled_write(read_uptime(), false);
 }
 #endif

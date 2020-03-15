@@ -37,6 +37,7 @@ enum custom_keycodes {
 #endif
 
 #define LOW_MH LT(_LOWER, KC_MHEN)  // タップで無変換, ホールドでLOWER
+#define RAI_HK LT(_RAISE, KC_HENK)  // タップで変換, ホールドでRAISE
 #define RAISE  MO(_RAISE)
 #define NUMPAD TG(_NUMPAD)
 #define ALT_ESC ALT_T(KC_ESC)       // タップでEsc, ホールドでAlt
@@ -59,7 +60,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
       KC_LSFT,    KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,                         KC_N,    KC_M, JP_COMM,  JP_DOT, KC_MINS, JP_SLSH,\
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
-                                          ALT_ESC,  LOW_MH,  KC_SPC,     KC_ENT,   RAISE, KC_RSFT \
+                                          ALT_ESC,  LOW_MH,  KC_SPC,     KC_ENT,  RAI_HK, KC_RSFT \
                                       //`--------------------------'  `--------------------------'
   ),
 
@@ -71,7 +72,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
       KC_LSFT,    KC_Z,    KC_X,    KC_C,    KC_V,    KC_F,                         KC_B,    KC_H,    KC_J,    KC_L, KC_MINS, JP_SLSH,\
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
-                                          ALT_ESC,  LOW_MH,  KC_SPC,     KC_ENT,   RAISE, KC_RSFT \
+                                          ALT_ESC,  LOW_MH,  KC_SPC,     KC_ENT,  RAI_HK, KC_RSFT \
                                       //`--------------------------'  `--------------------------'
   ),
 
@@ -92,7 +93,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //,-----------------------------------------------------.                    ,-----------------------------------------------------.
       _______,   KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,                        KC_F6,   KC_F7,   KC_F8,   KC_F9,  KC_F10,  KC_DEL,\
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
-      _______,  KC_F11,  KC_F12, XXXXXXX, KC_HENK, XXXXXXX,                      XXXXXXX, XXXXXXX,   KC_UP, XXXXXXX, XXXXXXX, XXXXXXX,\
+      _______,  KC_F11,  KC_F12, XXXXXXX, XXXXXXX, XXXXXXX,                      XXXXXXX, XXXXXXX,   KC_UP, XXXXXXX, XXXXXXX, XXXXXXX,\
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
       _______,  NUMPAD, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                      XXXXXXX, KC_LEFT, KC_DOWN, KC_RGHT, XXXXXXX, XXXXXXX,\
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
@@ -120,7 +121,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
       _______, KC_LWIN, G(KC_X), _______, G(KC_V), _______,                      _______, KC_HOME, KC_PGDN,  KC_END,  QWERTY, EUCALYN,\
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
-                                          _______,  LOW_MH, _______,    _______,   RAISE, _______ \
+                                          _______, _______, _______,    _______, _______, _______ \
                                       //`--------------------------'  `--------------------------'
   )
 };

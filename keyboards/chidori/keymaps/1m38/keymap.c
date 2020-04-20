@@ -260,10 +260,9 @@ bool led_update_user(led_t led_state) {
 void oled_task_user(void) {
   // If you want to change the display of OLED, you need to change here
   oled_write_ln(read_layer_state(), false);
-  oled_write_ln(read_keylog(), false);
   oled_write_ln(read_host_led_state(), false);
-  oled_write(read_count(), false);
-  //set_uptime();
-  //oled_write(read_uptime(), false);
+  oled_write_ln(read_count(), false);
+  set_uptime();
+  oled_write(read_uptime(), false);
 }
 #endif

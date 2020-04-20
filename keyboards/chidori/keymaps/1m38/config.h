@@ -47,6 +47,6 @@
 }
 */
 
-#define TAPPING_TERM 140
+#define TAPPING_TERM 200
 #define PERMISSIVE_HOLD
 #define SWAP_CAPS 0

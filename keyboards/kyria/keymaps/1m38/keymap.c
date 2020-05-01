@@ -379,3 +379,10 @@ void encoder_update_user(uint8_t index, bool clockwise) {
     }
 }
 #endif
+
+void keyboard_post_init_user(void) {
+#ifdef RGBLIGHT_ENABLE
+    rgblight_enable_noeeprom();
+    rgblight_sethsv_noeeprom(156, 255, 168);
+#endif
+}

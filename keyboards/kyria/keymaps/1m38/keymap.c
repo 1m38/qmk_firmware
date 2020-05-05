@@ -163,6 +163,7 @@ static bool g_swap_caps = false;
 bool        process_record_user(uint16_t keycode, keyrecord_t *record) {
 #ifdef OLED_DRIVER_ENABLE
     if (record->event.pressed) {
+        set_keylog(keycode, record);
         count_type();
     }
 #endif
@@ -278,8 +279,9 @@ static void oled_render_master(void) {
 
     oled_write_layer_state();
     oled_render_host_led_state();
+    // oled_render_key();
     oled_render_type_count();
-    //oled_render_uptime();
+    // oled_render_uptime();
     oled_render_rgb_value();
 }
 

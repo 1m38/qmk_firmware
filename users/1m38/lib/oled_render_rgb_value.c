@@ -1,6 +1,7 @@
 #include QMK_KEYBOARD_H
 
 #ifdef OLED_DRIVER_ENABLE
+#ifdef RGBLIGHT_ENABLE
 
 void oled_render_rgb_value(void) {
     static char value_str[6];
@@ -15,4 +16,5 @@ void oled_render_rgb_value(void) {
     oled_write_ln(value_str, false);
 }
 
+#endif
 #endif

@@ -14,21 +14,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include QMK_KEYBOARD_H
+#include "1m38.h"
 
 #include "board.h"
 #include "keymap_jp.h"
-#include <stdio.h>
-
-#ifdef OLED_DRIVER_ENABLE
-const char *read_layer_state(void);
-const char *read_host_led_state(void);
-const char *read_keylog(void);
-void set_keylog(uint16_t keycode, keyrecord_t *record);
-void set_uptime(void);
-const char *read_uptime(void);
-void count_up(void);
-const char *read_count(void);
-#endif
+// #include <stdio.h>
 
 extern keymap_config_t keymap_config;
 
@@ -44,40 +34,6 @@ enum layer_number
   _ADJUST
 };
 
-const char *print_layer(int layer_number)
-{
-  static char layer_str[24];
-  switch (layer_number)
-  {
-    case _QWERTY:
-      snprintf(layer_str, sizeof(layer_str), "%s", "Qwerty");
-      return layer_str;
-    case _QWERTY_US:
-      snprintf(layer_str, sizeof(layer_str), "%s", "Qwerty(US)");
-      return layer_str;
-    case _EUCALYN:
-      snprintf(layer_str, sizeof(layer_str), "%s", "Eucalyn");
-      return layer_str;
-    case _RAISE:
-      snprintf(layer_str, sizeof(layer_str), "%s", "Raise");
-      return layer_str;
-    case _RAISE_US:
-      snprintf(layer_str, sizeof(layer_str), "%s", "Raise(US)");
-      return layer_str;
-    case _LOWER:
-      snprintf(layer_str, sizeof(layer_str), "%s", "Lower");
-      return layer_str;
-    case _NUMPAD:
-      snprintf(layer_str, sizeof(layer_str), "%s", "NumPad");
-      return layer_str;
-    case _ADJUST:
-      snprintf(layer_str, sizeof(layer_str), "%s", "Adjust");
-      return layer_str;
-    default:
-      snprintf(layer_str, sizeof(layer_str), "%s", "Undef");
-      return layer_str;
-  }
-}
 
 // Tap Dance declarations
 enum td_keycodes {
@@ -229,7 +185,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 #ifdef OLED_DRIVER_ENABLE
   if (record->event.pressed) {
     set_keylog(keycode, record);
-    count_up();
+    count_type();
   }
 #endif
   switch (keycode) {
@@ -263,13 +219,45 @@ bool led_update_user(led_t led_state) {
 
 #ifdef OLED_DRIVER_ENABLE
 
+void oled_write_layer_state(void) {
+    oled_write_P(PSTR("L: "), false);
+    switch (get_highest_layer(layer_state | default_layer_state)) {
+        case _QWERTY:
+            oled_write_ln_P(PSTR("Qwerty"), false);
+            break;
+        case _QWERTY_US:
+            oled_write_ln_P(PSTR("Qwerty(US)"), false);
+            break;
+        case _EUCALYN:
+            oled_write_ln_P(PSTR("Eucalyn"), false);
+            break;
+        case _RAISE:
+            oled_write_ln_P(PSTR("Raise"), false);
+            break;
+        case _RAISE_US:
+            oled_write_ln_P(PSTR("Raise(US)"), false);
+            break;
+        case _LOWER:
+            oled_write_ln_P(PSTR("Lower"), false);
+            break;
+        case _NUMPAD:
+            oled_write_ln_P(PSTR("NumPad"), false);
+            break;
+        case _ADJUST:
+            oled_write_ln_P(PSTR("Adjust"), false);
+            break;
+        default:
+            oled_write_ln_P(PSTR("Undef"), false);
+            break;
+    }
+}
+
 void oled_task_user(void) {
   // If you want to change the display of OLED, you need to change here
-  oled_write_ln(read_layer_state(), false);
-  oled_write_ln(read_host_led_state(), false);
-  oled_write_ln(read_count(), false);
-  set_uptime();
-  oled_write(read_uptime(), false);
+  oled_write_layer_state();
+  oled_render_host_led_state();
+  oled_render_type_count();
+  oled_render_uptime();
 }
 #endif
 

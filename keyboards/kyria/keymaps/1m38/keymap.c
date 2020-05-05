@@ -14,14 +14,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include QMK_KEYBOARD_H
+#include "1m38.h"
 #include "keymap_jp.h"
 
-#ifdef OLED_DRIVER_ENABLE
-void type_count(void);
-void set_uptime(void);
-#endif
-
-enum layers { _QWERTY = 0, _QWERTY_US, _EUCALYN, _RAISE, _RAISE_US, _LOWER, _NUMPAD, _ADJUST };
+enum layers {
+    _QWERTY,
+    _QWERTY_US,
+    _EUCALYN,
+    _RAISE,
+    _RAISE_US,
+    _LOWER,
+    _NUMPAD,
+    _ADJUST
+};
 
 // Defines the keycodes used by our macros in process_record_user
 enum custom_keycodes {
@@ -158,7 +163,7 @@ static bool g_swap_caps = false;
 bool        process_record_user(uint16_t keycode, keyrecord_t *record) {
 #ifdef OLED_DRIVER_ENABLE
     if (record->event.pressed) {
-        type_count();
+        count_type();
     }
 #endif
     switch (keycode) {
@@ -235,22 +240,15 @@ static void render_qmk_logo(void) {
 
 void oled_write_layer_state(void) {
     oled_write_P(PSTR("L: "), false);
-    switch (get_highest_layer(layer_state)) {
-        case 0:  // Default layer
-            switch (get_highest_layer(default_layer_state)) {
-                case _QWERTY:
-                    oled_write_P(PSTR("Qwerty"), false);
-                    break;
-                case _QWERTY_US:
-                    oled_write_P(PSTR("Qwerty(US)"), false);
-                    break;
-                case _EUCALYN:
-                    oled_write_P(PSTR("Eucalyn"), false);
-                    break;
-                default:
-                    oled_write_P(PSTR("Undef"), false);
-                    break;
-            }
+    switch (get_highest_layer(layer_state | default_layer_state)) {
+        case _QWERTY:
+            oled_write_P(PSTR("Qwerty"), false);
+            break;
+        case _QWERTY_US:
+            oled_write_P(PSTR("Qwerty(US)"), false);
+            break;
+        case _EUCALYN:
+            oled_write_P(PSTR("Eucalyn"), false);
             break;
         case _RAISE:
             oled_write_P(PSTR("Raise"), false);
@@ -274,79 +272,15 @@ void oled_write_layer_state(void) {
     oled_write_ln_P(g_swap_caps ? PSTR(" SwCp") : PSTR(""), false);
 }
 
-void oled_write_host_led_state(void) {
-    const led_t led_state = host_keyboard_led_state();
-    oled_write_P(PSTR("NL:"), false);
-    oled_write_P(led_state.num_lock ? PSTR("on") : PSTR("- "), false);
-    oled_write_P(PSTR(" CL:"), false);
-    oled_write_P(led_state.caps_lock ? PSTR("on") : PSTR("- "), false);
-    oled_write_P(PSTR(" SL:"), false);
-    oled_write_ln_P(led_state.scroll_lock ? PSTR("on") : PSTR("-"), false);
-}
-
-unsigned int g_type_count = 0;
-void         type_count(void) { g_type_count++; }
-
-void oled_write_type_count(void) {
-    oled_write_P(PSTR("Type count: "), false);
-    static char type_count_str[7];
-    itoa(g_type_count, type_count_str, 10);
-    oled_write_ln(type_count_str, false);
-}
-
-void oled_write_uptime(void) {
-    static uint32_t uptime_s;
-    uptime_s = timer_read32() / 1000;
-    static unsigned int uptime_tmp;
-    static char         uptime_str[5];
-    oled_write_P(PSTR("Uptime "), false);
-    // hour
-    uptime_tmp = (uptime_s / 3600) % 60;
-    itoa(uptime_tmp, uptime_str, 10);
-    if (uptime_tmp < 10) {
-        oled_write_char('0', false);
-    }
-    oled_write(uptime_str, false);
-    oled_write_char(':', false);
-    // minutes
-    uptime_tmp = (uptime_s / 60) % 60;
-    itoa(uptime_tmp, uptime_str, 10);
-    if (uptime_tmp < 10) {
-        oled_write_char('0', false);
-    }
-    oled_write(uptime_str, false);
-    oled_write_char(':', false);
-    // seconds
-    uptime_tmp = uptime_s % 60;
-    itoa(uptime_tmp, uptime_str, 10);
-    if (uptime_tmp < 10) {
-        oled_write_char('0', false);
-    }
-    oled_write_ln(uptime_str, false);
-}
-
-void oled_write_rgb_value(void) {
-    static char value_str[6];
-    oled_write_P(PSTR("H:"), false);
-    itoa(rgblight_get_hue(), value_str, 10);
-    oled_write(value_str, false);
-    oled_write_P(PSTR(" S:"), false);
-    itoa(rgblight_get_sat(), value_str, 10);
-    oled_write(value_str, false);
-    oled_write_P(PSTR(" V:"), false);
-    itoa(rgblight_get_val(), value_str, 10);
-    oled_write_ln(value_str, false);
-}
-
 static void oled_render_master(void) {
     // QMK Logo and version information
     render_qmk_logo();
 
     oled_write_layer_state();
-    oled_write_host_led_state();
-    oled_write_type_count();
-    //oled_write_uptime();
-    oled_write_rgb_value();
+    oled_render_host_led_state();
+    oled_render_type_count();
+    //oled_render_uptime();
+    oled_render_rgb_value();
 }
 
 void oled_task_user(void) {

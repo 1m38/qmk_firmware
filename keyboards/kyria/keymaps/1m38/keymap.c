@@ -335,10 +335,18 @@ void encoder_update_user(uint8_t index, bool clockwise) {
         }
     } else if (index == 1) {
         // Mouse wheel
-        if (clockwise) {
-            tap_code(KC_MS_WH_DOWN);
+        if (get_highest_layer(layer_state) == _RAISE) {
+            if (clockwise) {
+                tap_code(KC_MS_WH_RIGHT);
+            } else {
+                tap_code(KC_MS_WH_LEFT);
+            }
         } else {
-            tap_code(KC_MS_WH_UP);
+            if (clockwise) {
+                tap_code(KC_MS_WH_DOWN);
+            } else {
+                tap_code(KC_MS_WH_UP);
+            }
         }
     }
 }

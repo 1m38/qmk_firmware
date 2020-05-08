@@ -159,7 +159,14 @@ layer_state_t layer_state_set_user(layer_state_t state) {
     return state;
 }
 
-static bool g_swap_caps = false;
+typedef union {
+    uint32_t raw;
+    struct {
+        bool swap_caps :1;
+    };
+} user_eeprom_config_t;
+user_eeprom_config_t user_eeprom_config;
+
 bool        process_record_user(uint16_t keycode, keyrecord_t *record) {
 #ifdef OLED_DRIVER_ENABLE
     if (record->event.pressed) {
@@ -185,11 +192,12 @@ bool        process_record_user(uint16_t keycode, keyrecord_t *record) {
             return false;
         case SWAP_CA:
             if (record->event.pressed) {
-                g_swap_caps = (!g_swap_caps);
+                user_eeprom_config.swap_caps ^= 1;
+                eeconfig_update_user(user_eeprom_config.raw);
             }
             return false;
         case KC_CAPS:
-            if (g_swap_caps) {
+            if (user_eeprom_config.swap_caps) {
                 if (record->event.pressed) {
                     register_code(KC_LCTL);
                 } else {
@@ -200,7 +208,7 @@ bool        process_record_user(uint16_t keycode, keyrecord_t *record) {
                 return true;
             }
         case KC_LCTL:
-            if (g_swap_caps) {
+            if (user_eeprom_config.swap_caps) {
                 if (record->event.pressed) {
                     register_code(KC_CAPS);
                 } else {
@@ -270,7 +278,7 @@ void oled_write_layer_state(void) {
             oled_write_P(PSTR("Undef"), false);
             break;
     }
-    oled_write_ln_P(g_swap_caps ? PSTR(" SwCp") : PSTR(""), false);
+    oled_write_ln_P(user_eeprom_config.swap_caps ? PSTR(" SwCp") : PSTR(""), false);
 }
 
 static void oled_render_master(void) {
@@ -337,8 +345,16 @@ void encoder_update_user(uint8_t index, bool clockwise) {
 #endif
 
 void keyboard_post_init_user(void) {
+    // read EEPROM config
+    user_eeprom_config.raw = eeconfig_read_user();
+}
+
+void eeconfig_init_user(void) {
+    user_eeprom_config.raw = 0;
+    eeconfig_update_user(user_eeprom_config.raw);
+
 #ifdef RGBLIGHT_ENABLE
-    rgblight_enable_noeeprom();
-    rgblight_sethsv_noeeprom(156, 255, 168);
+    rgblight_enable();
+    rgblight_sethsv(156, 255, 168);
 #endif
 }

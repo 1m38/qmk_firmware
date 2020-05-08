@@ -307,7 +307,7 @@ void encoder_update_user(uint8_t index, bool clockwise) {
 #ifdef RGBLIGHT_ENABLE
         if (get_highest_layer(layer_state) == _ADJUST) {
             // Hue change
-            if (!clockwise) {
+            if (clockwise) {
                 rgblight_increase_hue_noeeprom();
             } else {
                 rgblight_decrease_hue_noeeprom();
@@ -315,7 +315,7 @@ void encoder_update_user(uint8_t index, bool clockwise) {
         } else
 #endif
         // Mouse wheel
-        if (!clockwise) {
+        if (clockwise) {
             tap_code(KC_MS_WH_DOWN);
         } else {
             tap_code(KC_MS_WH_UP);

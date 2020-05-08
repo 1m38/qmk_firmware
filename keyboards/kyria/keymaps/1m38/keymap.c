@@ -56,7 +56,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     //|--------+--------+--------+--------+--------+--------+-----------------.  ------------------+--------+--------+--------+--------+--------+--------|
         KC_LSFT,    KC_Z,    KC_X,    KC_C,    KC_V,    KC_B, XXXXXXX, KC_LWIN,    XXXXXXX, XXXXXXX,    KC_N,    KC_M, JP_COMM,  JP_DOT, KC_MINS, JP_SLSH,\
     //|--------+--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------+--------|
-                                   _______, ALT_ESC,  LOW_MH,  KC_SPC, KC_BSPC,    KC_RCTL,  KC_ENT,  RAI_HK, KC_RSFT, KC_BTN1 \
+                                   _______, ALT_ESC,  LOW_MH,  KC_SPC, KC_BSPC,    KC_RCTL,  KC_ENT,  RAI_HK, KC_RSFT, KC_BTN3 \
                                //`--------------------------------------------'  `--------------------------------------------'
     ),
 
@@ -304,8 +304,18 @@ void encoder_update_user(uint8_t index, bool clockwise) {
             tap_code(KC_VOLD);
         }
     } else if (index == 1) {
-        // Page up/Page down
-        if (clockwise) {
+#ifdef RGBLIGHT_ENABLE
+        if (get_highest_layer(layer_state) == _ADJUST) {
+            // Hue change
+            if (!clockwise) {
+                rgblight_increase_hue_noeeprom();
+            } else {
+                rgblight_decrease_hue_noeeprom();
+            }
+        } else
+#endif
+        // Mouse wheel
+        if (!clockwise) {
             tap_code(KC_MS_WH_DOWN);
         } else {
             tap_code(KC_MS_WH_UP);

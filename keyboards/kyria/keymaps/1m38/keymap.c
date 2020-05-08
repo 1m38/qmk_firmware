@@ -56,7 +56,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     //|--------+--------+--------+--------+--------+--------+-----------------.  ------------------+--------+--------+--------+--------+--------+--------|
         KC_LSFT,    KC_Z,    KC_X,    KC_C,    KC_V,    KC_B, XXXXXXX, KC_LWIN,    XXXXXXX, XXXXXXX,    KC_N,    KC_M, JP_COMM,  JP_DOT, KC_MINS, JP_SLSH,\
     //|--------+--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------+--------|
-                                   _______, ALT_ESC,  LOW_MH,  KC_SPC, KC_BSPC,    KC_RCTL,  KC_ENT,  RAI_HK, KC_RSFT, KC_BTN3 \
+                                   RGB_TOG, ALT_ESC,  LOW_MH,  KC_SPC, KC_BSPC,    KC_RCTL,  KC_ENT,  RAI_HK, KC_RSFT, KC_BTN3 \
                                //`--------------------------------------------'  `--------------------------------------------'
     ),
 
@@ -282,7 +282,9 @@ static void oled_render_master(void) {
     // oled_render_key();
     oled_render_type_count();
     // oled_render_uptime();
+#if RGBLIGHT_ENABLE
     oled_render_rgb_value();
+#endif
 }
 
 void oled_task_user(void) {
@@ -297,23 +299,33 @@ void oled_task_user(void) {
 #ifdef ENCODER_ENABLE
 void encoder_update_user(uint8_t index, bool clockwise) {
     if (index == 0) {
-        // Volume control
-        if (clockwise) {
-            tap_code(KC_VOLU);
-        } else {
-            tap_code(KC_VOLD);
+        if (get_highest_layer(layer_state) == _RAISE) {
+            // Left/Right
+            if (clockwise) {
+                tap_code(KC_RIGHT);
+            } else {
+                tap_code(KC_LEFT);
+            }
         }
-    } else if (index == 1) {
 #ifdef RGBLIGHT_ENABLE
-        if (get_highest_layer(layer_state) == _ADJUST) {
+        else if (get_highest_layer(layer_state) == _ADJUST) {
             // Hue change
             if (clockwise) {
                 rgblight_increase_hue_noeeprom();
             } else {
                 rgblight_decrease_hue_noeeprom();
             }
-        } else
+        }
 #endif
+        else {
+            // Up/Down
+            if (clockwise) {
+                tap_code(KC_UP);
+            } else {
+                tap_code(KC_DOWN);
+            }
+        }
+    } else if (index == 1) {
         // Mouse wheel
         if (clockwise) {
             tap_code(KC_MS_WH_DOWN);

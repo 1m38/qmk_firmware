@@ -232,7 +232,8 @@ typedef enum {
     UNKNOWN_TAP,
     SINGLE_TAP,
     SINGLE_HOLD,
-    DOUBLE_TAP
+    DOUBLE_TAP,
+    TRIPLE_OR_MORE_TAP
 } tap_state_t;
 
 typedef struct {
@@ -250,8 +251,10 @@ tap_state_t cur_dance(qk_tap_dance_state_t *state) {
         }
     } else if (state->count == 2) {
         return DOUBLE_TAP;
-    } else
-        return UNKNOWN_TAP;
+    } else if (state->count >= 3) {
+        return TRIPLE_OR_MORE_TAP;
+    }
+    return UNKNOWN_TAP;
 }
 
 // Tap Dance definition: LOWER_MH
@@ -302,6 +305,7 @@ void alt_esc_mh_finished(qk_tap_dance_state_t *state, void *user_data) {
             register_code(KC_LALT);
             break;
         case DOUBLE_TAP:
+        case TRIPLE_OR_MORE_TAP:
             tap_code(KC_ESC);
             // 無変換(US layout -> F15)
             tap_code((get_highest_layer(default_layer_state) == _QWERTY_US) ? KC_F15 : KC_MHEN);

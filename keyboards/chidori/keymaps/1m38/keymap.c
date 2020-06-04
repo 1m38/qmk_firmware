@@ -47,15 +47,8 @@ enum custom_keycodes
   QWERTY = SAFE_RANGE,
   EUCALYN,
   QWER_US,
+  SWAP_CA,
 };
-
-#if SWAP_CAPS
-  #define MY_LCTL KC_CAPS
-  #define MY_CAPS KC_LCTL
-#else
-  #define MY_LCTL KC_LCTL
-  #define MY_CAPS KC_CAPS
-#endif
 
 #define LOW_MH LT(_LOWER, KC_MHEN)  // タップで無変換, ホールドでLOWER
 #define RAI_HK LT(_RAISE, KC_HENK)  // タップで変換, ホールドでRAISE
@@ -73,7 +66,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //,-----------------------------------------------------.        ,-----------------------------------------------------.
        KC_TAB,    KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,             KC_Y,    KC_U,    KC_I,    KC_O,    KC_P, KC_BSPC,\
   //|--------+--------+--------+--------+--------+--------|        |--------+--------+--------+--------+--------+--------|
-      MY_LCTL,    KC_A,    KC_S,    KC_D,    KC_F,    KC_G,             KC_H,    KC_J,    KC_K,    KC_L, JP_SCLN, JP_COLN,\
+      KC_LCTL,    KC_A,    KC_S,    KC_D,    KC_F,    KC_G,             KC_H,    KC_J,    KC_K,    KC_L, JP_SCLN, JP_COLN,\
   //|--------+--------+--------+--------+--------+--------|        |--------+--------+--------+--------+--------+--------|
       KC_LSFT,    KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,             KC_N,    KC_M, JP_COMM,  JP_DOT, KC_MINS, JP_SLSH,\
   //|--------+--------+--------+--------+--------+--------|        |--------+--------+--------+--------+--------+--------|
@@ -85,7 +78,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //,-----------------------------------------------------.        ,-----------------------------------------------------.
        KC_TAB,    KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,             KC_Y,    KC_U,    KC_I,    KC_O,    KC_P, KC_BSPC,\
   //|--------+--------+--------+--------+--------+--------|        |--------+--------+--------+--------+--------+--------|
-      MY_LCTL,    KC_A,    KC_S,    KC_D,    KC_F,    KC_G,             KC_H,    KC_J,    KC_K,    KC_L, KC_SCLN,  KC_EQL,\
+      KC_LCTL,    KC_A,    KC_S,    KC_D,    KC_F,    KC_G,             KC_H,    KC_J,    KC_K,    KC_L, KC_SCLN,  KC_EQL,\
   //|--------+--------+--------+--------+--------+--------|        |--------+--------+--------+--------+--------+--------|
       KC_LSFT,    KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,             KC_N,    KC_M, KC_COMM,  KC_DOT, KC_MINS, KC_SLSH,\
   //|--------+--------+--------+--------+--------+--------|        |--------+--------+--------+--------+--------+--------|
@@ -157,7 +150,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //,-----------------------------------------------------.        ,-----------------------------------------------------.
     G(KC_TAB), _______, _______, G(KC_E), G(KC_R), _______,           KC_INS, WINSFTS, WINPSCR, JP_ZHTG, JP_KANA,   RESET,\
   //|--------+--------+--------+--------+--------+--------|        |--------+--------+--------+--------+--------+--------|
-      _______, G(KC_A), _______, G(KC_D), _______, _______,       S(MY_CAPS), KC_PSCR, _______, _______, _______,   PANIC,\
+      _______, G(KC_A), _______, G(KC_D), _______, _______,          KC_CAPS, KC_PSCR, _______, _______, SWAP_CA,   PANIC,\
   //|--------+--------+--------+--------+--------+--------|        |--------+--------+--------+--------+--------+--------|
       _______, KC_LWIN, G(KC_X), _______, G(KC_V), _______,          _______, _______, _______, QWER_US,  QWERTY, EUCALYN,\
   //|--------+--------+--------+--------+--------+--------|        |--------+--------+--------+--------+--------+--------|
@@ -180,6 +173,14 @@ layer_state_t layer_state_set_user(layer_state_t state) {
   }
   return state;
 }
+
+typedef union {
+    uint32_t raw;
+    struct {
+        bool swap_caps : 1;
+    };
+} user_eeprom_config_t;
+user_eeprom_config_t user_eeprom_config;
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 #ifdef OLED_DRIVER_ENABLE
@@ -204,6 +205,34 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         persistent_default_layer_set(1UL<<_QWERTY_US);
       }
       return false;
+    case SWAP_CA:
+      if (record->event.pressed) {
+        user_eeprom_config.swap_caps ^= 1;
+        eeconfig_update_user(user_eeprom_config.raw);
+      }
+      return false;
+    case KC_CAPS:
+      if (user_eeprom_config.swap_caps) {
+        if (record->event.pressed) {
+          register_code(KC_LCTL);
+        } else {
+          unregister_code(KC_LCTL);
+        }
+        return false;
+      } else {
+        return true;
+      }
+    case KC_LCTL:
+      if (user_eeprom_config.swap_caps) {
+        if (record->event.pressed) {
+          register_code(KC_CAPS);
+        } else {
+          unregister_code(KC_CAPS);
+        }
+        return false;
+      } else {
+        return true;
+      }
   }
   return true;
 }
@@ -223,33 +252,34 @@ void oled_write_layer_state(void) {
     oled_write_P(PSTR("L: "), false);
     switch (get_highest_layer(layer_state | default_layer_state)) {
         case _QWERTY:
-            oled_write_ln_P(PSTR("Qwerty"), false);
+            oled_write_P(PSTR("Qwerty"), false);
             break;
         case _QWERTY_US:
-            oled_write_ln_P(PSTR("Qwerty(US)"), false);
+            oled_write_P(PSTR("Qwerty(US)"), false);
             break;
         case _EUCALYN:
-            oled_write_ln_P(PSTR("Eucalyn"), false);
+            oled_write_P(PSTR("Eucalyn"), false);
             break;
         case _RAISE:
-            oled_write_ln_P(PSTR("Raise"), false);
+            oled_write_P(PSTR("Raise"), false);
             break;
         case _RAISE_US:
-            oled_write_ln_P(PSTR("Raise(US)"), false);
+            oled_write_P(PSTR("Raise(US)"), false);
             break;
         case _LOWER:
-            oled_write_ln_P(PSTR("Lower"), false);
+            oled_write_P(PSTR("Lower"), false);
             break;
         case _NUMPAD:
-            oled_write_ln_P(PSTR("NumPad"), false);
+            oled_write_P(PSTR("NumPad"), false);
             break;
         case _ADJUST:
-            oled_write_ln_P(PSTR("Adjust"), false);
+            oled_write_P(PSTR("Adjust"), false);
             break;
         default:
-            oled_write_ln_P(PSTR("Undef"), false);
+            oled_write_P(PSTR("Undef"), false);
             break;
     }
+    oled_write_ln_P(user_eeprom_config.swap_caps ? PSTR(" SwCp") : PSTR(""), false);
 }
 
 void oled_task_user(void) {
@@ -335,6 +365,15 @@ void alt_esc_mh_reset (qk_tap_dance_state_t *state, void *user_data)
 
 //Tap Dance Definitions
 qk_tap_dance_action_t tap_dance_actions[] = {
-  
   [TD_ALT_ESC_MH]  = ACTION_TAP_DANCE_FN_ADVANCED(NULL, alt_esc_mh_finished, alt_esc_mh_reset)
 };
+
+void keyboard_post_init_user(void) {
+    // read EEPROM config
+    user_eeprom_config.raw = eeconfig_read_user();
+}
+
+void eeconfig_init_user(void) {
+    user_eeprom_config.raw = 0;
+    eeconfig_update_user(user_eeprom_config.raw);
+}

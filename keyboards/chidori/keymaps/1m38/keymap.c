@@ -22,42 +22,39 @@
 
 extern keymap_config_t keymap_config;
 
-enum layer_number
-{
-  _QWERTY = 0,
-  _QWERTY_US,
-  _EUCALYN,
-  _RAISE,
-  _RAISE_US,
-  _LOWER,
-  _NUMPAD,
-  _ADJUST
+enum layer_number {
+    _QWERTY,
+    _QWERTY_US,
+    _EUCALYN,
+    _RAISE,
+    _RAISE_US,
+    _LOWER,
+    _NUMPAD,
+    _ADJUST
 };
-
 
 // Tap Dance declarations
 enum td_keycodes {
-  TD_ALT_ESC_MH   // ホールドでAlt, タップでEsc, ダブルタップでEsc+無変換
+    TD_ALT_ESC_MH  // ホールドでAlt, タップでEsc, ダブルタップでEsc+無変換
 };
-#define TD_AEMH TD(TD_ALT_ESC_MH)    // ホールドでAlt, タップでEsc, ダブルタップでEsc+無変換
+#define TD_AEMH TD(TD_ALT_ESC_MH)  // ホールドでAlt, タップでEsc, ダブルタップでEsc+無変換
 
 // Defines the keycodes used by our macros in process_record_user
-enum custom_keycodes
-{
-  QWERTY = SAFE_RANGE,
-  EUCALYN,
-  QWER_US,
-  SWAP_CA,
+enum custom_keycodes {
+    QWERTY = SAFE_RANGE,
+    EUCALYN,
+    QWER_US,
+    SWAP_CA,
 };
 
-#define LOW_MH LT(_LOWER, KC_MHEN)  // タップで無変換, ホールドでLOWER
-#define RAI_HK LT(_RAISE, KC_HENK)  // タップで変換, ホールドでRAISE
-#define LOW_MHU LT(_LOWER, KC_F15)  // タップで無変換(F15), ホールドでLOWER
+#define LOW_MH LT(_LOWER, KC_MHEN)     // タップで無変換, ホールドでLOWER
+#define RAI_HK LT(_RAISE, KC_HENK)     // タップで変換, ホールドでRAISE
+#define LOW_MHU LT(_LOWER, KC_F15)     // タップで無変換(F15), ホールドでLOWER
 #define RAI_HKU LT(_RAISE_US, KC_F16)  // タップで変換(F16), ホールドでRAISE
 #define NUMPAD TG(_NUMPAD)
-#define ALT_ESC ALT_T(KC_ESC)       // タップでEsc, ホールドでAlt
-#define WINPSCR G(KC_PSCR)          // Win + PrtScr
-#define WINSFTS G(S(KC_S))          // Win + Shift + S
+#define ALT_ESC ALT_T(KC_ESC)     // タップでEsc, ホールドでAlt
+#define WINPSCR G(KC_PSCR)        // Win + PrtScr
+#define WINSFTS G(S(KC_S))        // Win + Shift + S
 #define PANIC LALT(LCTL(KC_DEL))  // Ctrl-Alt-Del
 
 // clang-format off
@@ -161,17 +158,16 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 // clang-format on
 
 void persistent_default_layer_set(uint16_t default_layer) {
-  eeconfig_update_default_layer(default_layer);
-  default_layer_set(default_layer);
+    eeconfig_update_default_layer(default_layer);
+    default_layer_set(default_layer);
 }
 
 layer_state_t layer_state_set_user(layer_state_t state) {
-  state = update_tri_layer_state(state, _LOWER, _RAISE, _ADJUST);
-  if ((state & (1UL << _ADJUST)) == 0)
-  {
-    state = update_tri_layer_state(state, _LOWER, _RAISE_US, _ADJUST);
-  }
-  return state;
+    state = update_tri_layer_state(state, _LOWER, _RAISE, _ADJUST);
+    if ((state & (1UL << _ADJUST)) == 0) {
+        state = update_tri_layer_state(state, _LOWER, _RAISE_US, _ADJUST);
+    }
+    return state;
 }
 
 typedef union {
@@ -184,66 +180,66 @@ user_eeprom_config_t user_eeprom_config;
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 #ifdef OLED_DRIVER_ENABLE
-  if (record->event.pressed) {
-    set_keylog(keycode, record);
-    count_type();
-  }
+    if (record->event.pressed) {
+        set_keylog(keycode, record);
+        count_type();
+    }
 #endif
-  switch (keycode) {
-    case QWERTY:
-      if (record->event.pressed) {
-        persistent_default_layer_set(1UL<<_QWERTY);
-      }
-      return false;
-    case EUCALYN:
-      if (record->event.pressed) {
-        persistent_default_layer_set(1UL<<_EUCALYN);
-      }
-      return false;
-    case QWER_US:
-      if (record->event.pressed) {
-        persistent_default_layer_set(1UL<<_QWERTY_US);
-      }
-      return false;
-    case SWAP_CA:
-      if (record->event.pressed) {
-        user_eeprom_config.swap_caps ^= 1;
-        eeconfig_update_user(user_eeprom_config.raw);
-      }
-      return false;
-    case KC_CAPS:
-      if (user_eeprom_config.swap_caps) {
-        if (record->event.pressed) {
-          register_code(KC_LCTL);
-        } else {
-          unregister_code(KC_LCTL);
-        }
-        return false;
-      } else {
-        return true;
-      }
-    case KC_LCTL:
-      if (user_eeprom_config.swap_caps) {
-        if (record->event.pressed) {
-          register_code(KC_CAPS);
-        } else {
-          unregister_code(KC_CAPS);
-        }
-        return false;
-      } else {
-        return true;
-      }
-  }
-  return true;
+    switch (keycode) {
+        case QWERTY:
+            if (record->event.pressed) {
+                persistent_default_layer_set(1UL << _QWERTY);
+            }
+            return false;
+        case EUCALYN:
+            if (record->event.pressed) {
+                persistent_default_layer_set(1UL << _EUCALYN);
+            }
+            return false;
+        case QWER_US:
+            if (record->event.pressed) {
+                persistent_default_layer_set(1UL << _QWERTY_US);
+            }
+            return false;
+        case SWAP_CA:
+            if (record->event.pressed) {
+                user_eeprom_config.swap_caps ^= 1;
+                eeconfig_update_user(user_eeprom_config.raw);
+            }
+            return false;
+        case KC_CAPS:
+            if (user_eeprom_config.swap_caps) {
+                if (record->event.pressed) {
+                    register_code(KC_LCTL);
+                } else {
+                    unregister_code(KC_LCTL);
+                }
+                return false;
+            } else {
+                return true;
+            }
+        case KC_LCTL:
+            if (user_eeprom_config.swap_caps) {
+                if (record->event.pressed) {
+                    register_code(KC_CAPS);
+                } else {
+                    unregister_code(KC_CAPS);
+                }
+                return false;
+            } else {
+                return true;
+            }
+    }
+    return true;
 }
 
 bool led_update_user(led_t led_state) {
-  // Left Yellow: default layer (Qwerty: off, Eucalyn: on)
-  board_set_led_by_index(0, LED_YELLOW, (default_layer_state & (1U<<_EUCALYN)));
-  // Right Yellow: NUMPAD layer
-  board_set_led_by_index(1, LED_YELLOW, (layer_state & (1U<<_NUMPAD)));
+    // Left Yellow: default layer (Qwerty: off, Eucalyn: on)
+    board_set_led_by_index(0, LED_YELLOW, (default_layer_state & (1U << _EUCALYN)));
+    // Right Yellow: NUMPAD layer
+    board_set_led_by_index(1, LED_YELLOW, (layer_state & (1U << _NUMPAD)));
 
-  return false;
+    return false;
 }
 
 #ifdef OLED_DRIVER_ENABLE
@@ -283,89 +279,83 @@ void oled_write_layer_state(void) {
 }
 
 void oled_task_user(void) {
-  // If you want to change the display of OLED, you need to change here
-  oled_write_layer_state();
-  oled_render_host_led_state();
-  oled_render_type_count();
-  oled_render_uptime();
+    // If you want to change the display of OLED, you need to change here
+    oled_write_layer_state();
+    oled_render_host_led_state();
+    oled_render_type_count();
+    oled_render_uptime();
 }
 #endif
 
 // Tap Dance definitions
 typedef enum {
-  SINGLE_TAP,
-  SINGLE_HOLD,
-  DOUBLE_TAP,
-  TD_STATE_UNKNOWN
+    SINGLE_TAP,
+    SINGLE_HOLD,
+    DOUBLE_TAP,
+    TD_STATE_UNKNOWN
 } td_state_t;
 
 static td_state_t td_state;
 
-td_state_t cur_dance(qk_tap_dance_state_t *state)
-{
-  if (state->count == 1) {
-    if (!state->pressed) { return SINGLE_TAP; }
-    return SINGLE_HOLD;
-  }
-  if (state->count == 2) { return DOUBLE_TAP; }
-  return TD_STATE_UNKNOWN;
+td_state_t cur_dance(qk_tap_dance_state_t *state) {
+    if (state->count == 1) {
+        if (!state->pressed) {
+            return SINGLE_TAP;
+        }
+        return SINGLE_HOLD;
+    }
+    if (state->count == 2) {
+        return DOUBLE_TAP;
+    }
+    return TD_STATE_UNKNOWN;
 }
 
-void alt_esc_mh_finished (qk_tap_dance_state_t *state, void *user_data)
-{
-  td_state = cur_dance(state);
-  switch (td_state)
-  {
-    case SINGLE_TAP:
-      register_code(KC_ESC);    // Esc
-      break;
-    case SINGLE_HOLD:
-      register_code(KC_LALT);    // Alt
-      break;
-    case DOUBLE_TAP:
-      register_code(KC_ESC); unregister_code(KC_ESC);  // Esc
-      if (default_layer_state & (1U<<_QWERTY_US))
-      {
-        register_code(KC_F15);
-      }
-      else
-      {
-        register_code(KC_MHEN);   // 無変換
-      }
-      break;
-    default:
-      break;
-  }
+void alt_esc_mh_finished(qk_tap_dance_state_t *state, void *user_data) {
+    td_state = cur_dance(state);
+    switch (td_state) {
+        case SINGLE_TAP:
+            register_code(KC_ESC);  // Esc
+            break;
+        case SINGLE_HOLD:
+            register_code(KC_LALT);  // Alt
+            break;
+        case DOUBLE_TAP:
+            register_code(KC_ESC);
+            unregister_code(KC_ESC);  // Esc
+            if (default_layer_state & (1U << _QWERTY_US)) {
+                register_code(KC_F15);
+            } else {
+                register_code(KC_MHEN);  // 無変換
+            }
+            break;
+        default:
+            break;
+    }
 }
 
-void alt_esc_mh_reset (qk_tap_dance_state_t *state, void *user_data)
-{
-  switch (td_state)
-  {
-    case SINGLE_TAP:
-      unregister_code(KC_ESC);    // Escをリリース
-      break;
-    case SINGLE_HOLD:
-      unregister_code(KC_LALT);    // Altをリリース
-      break;
-    case DOUBLE_TAP:
-      if (default_layer_state & (1U<<_QWERTY_US))
-      {
-        unregister_code(KC_F15);
-      }
-      else
-      {
-        unregister_code(KC_MHEN);   // 無変換
-      }
-      break;
-    default:
-      break;
-  }
+void alt_esc_mh_reset(qk_tap_dance_state_t *state, void *user_data) {
+    switch (td_state) {
+        case SINGLE_TAP:
+            unregister_code(KC_ESC);  // Escをリリース
+            break;
+        case SINGLE_HOLD:
+            unregister_code(KC_LALT);  // Altをリリース
+            break;
+        case DOUBLE_TAP:
+            if (default_layer_state & (1U << _QWERTY_US)) {
+                unregister_code(KC_F15);
+            } else {
+                unregister_code(KC_MHEN);  // 無変換
+            }
+            break;
+        default:
+            break;
+    }
 }
 
-//Tap Dance Definitions
+// Tap Dance Definitions
 qk_tap_dance_action_t tap_dance_actions[] = {
-  [TD_ALT_ESC_MH]  = ACTION_TAP_DANCE_FN_ADVANCED(NULL, alt_esc_mh_finished, alt_esc_mh_reset)
+    [TD_ALT_ESC_MH] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, alt_esc_mh_finished, alt_esc_mh_reset)
 };
 
 void keyboard_post_init_user(void) {

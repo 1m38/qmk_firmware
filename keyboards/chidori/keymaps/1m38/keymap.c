@@ -35,9 +35,11 @@ enum layer_number {
 
 // Tap Dance declarations
 enum td_keycodes {
+    TD_LOWER_MH,   // 1tap: 無変換, hold: MO(_LOWER), 2tap: TG(_LOWER)
     TD_ALT_ESC_MH  // ホールドでAlt, タップでEsc, ダブルタップでEsc+無変換
 };
-#define TD_AEMH TD(TD_ALT_ESC_MH)  // ホールドでAlt, タップでEsc, ダブルタップでEsc+無変換
+#define TD_AEMH TD(TD_ALT_ESC_MH)
+#define TD_LOWMH TD(TD_LOWER_MH)
 
 // Defines the keycodes used by our macros in process_record_user
 enum custom_keycodes {
@@ -47,9 +49,8 @@ enum custom_keycodes {
     SWAP_CA,
 };
 
-#define LOW_MH LT(_LOWER, KC_MHEN)     // タップで無変換, ホールドでLOWER
 #define RAI_HK LT(_RAISE, KC_HENK)     // タップで変換, ホールドでRAISE
-#define LOW_MHU LT(_LOWER, KC_F15)     // タップで無変換(F15), ホールドでLOWER
+//#define LOW_MHU LT(_LOWER, KC_F15)     // タップで無変換(F15), ホールドでLOWER
 #define RAI_HKU LT(_RAISE_US, KC_F16)  // タップで変換(F16), ホールドでRAISE
 #define NUMPAD TG(_NUMPAD)
 #define ALT_ESC ALT_T(KC_ESC)     // タップでEsc, ホールドでAlt
@@ -67,7 +68,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //|--------+--------+--------+--------+--------+--------|        |--------+--------+--------+--------+--------+--------|
       KC_LSFT,    KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,             KC_N,    KC_M, JP_COMM,  JP_DOT, KC_MINS, JP_SLSH,\
   //|--------+--------+--------+--------+--------+--------|        |--------+--------+--------+--------+--------+--------|
-      XXXXXXX, XXXXXXX, KC_LWIN, TD_AEMH,  LOW_MH,  KC_SPC,           KC_ENT,  RAI_HK, KC_RSFT, KC_DOWN,   KC_UP,  NUMPAD \
+      XXXXXXX, XXXXXXX, KC_LWIN, TD_AEMH,TD_LOWMH,  KC_SPC,           KC_ENT,  RAI_HK, KC_RSFT, KC_DOWN,   KC_UP,  NUMPAD \
   //|-----------------------------------------------------'        `-----------------------------------------------------'
   ),
 
@@ -79,7 +80,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //|--------+--------+--------+--------+--------+--------|        |--------+--------+--------+--------+--------+--------|
       KC_LSFT,    KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,             KC_N,    KC_M, KC_COMM,  KC_DOT, KC_MINS, KC_SLSH,\
   //|--------+--------+--------+--------+--------+--------|        |--------+--------+--------+--------+--------+--------|
-      _______, _______, _______, _______, LOW_MHU, _______,          _______, RAI_HKU, _______, _______, _______, _______ \
+      _______, _______, _______, _______, _______, _______,          _______, RAI_HKU, _______, _______, _______, _______ \
   //|-----------------------------------------------------'        `-----------------------------------------------------'
   ),
 
@@ -91,7 +92,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //|--------+--------+--------+--------+--------+--------|        |--------+--------+--------+--------+--------+--------|
       _______,    KC_Z,    KC_X,    KC_C,    KC_V,    KC_F,             KC_B,    KC_H,    KC_J,    KC_L, KC_MINS, _______,\
   //|--------+--------+--------+--------+--------+--------|        |--------+--------+--------+--------+--------+--------|
-      _______, _______, _______, _______,  LOW_MH, _______,          _______,  RAI_HK, _______, _______, _______, _______ \
+      _______, _______, _______, _______, _______, _______,          _______,  RAI_HK, _______, _______, _______, _______ \
   //|-----------------------------------------------------'        `-----------------------------------------------------'
   ),
 
@@ -289,13 +290,12 @@ void oled_task_user(void) {
 
 // Tap Dance definitions
 typedef enum {
+    UNKNOWN_TAP,
     SINGLE_TAP,
     SINGLE_HOLD,
     DOUBLE_TAP,
-    TD_STATE_UNKNOWN
+    TRIPLE_OR_MORE_TAP
 } td_state_t;
-
-static td_state_t td_state;
 
 td_state_t cur_dance(qk_tap_dance_state_t *state) {
     if (state->count == 1) {
@@ -306,13 +306,47 @@ td_state_t cur_dance(qk_tap_dance_state_t *state) {
     }
     if (state->count == 2) {
         return DOUBLE_TAP;
+    } else if (state->count >= 3) {
+        return TRIPLE_OR_MORE_TAP;
     }
-    return TD_STATE_UNKNOWN;
+    return UNKNOWN_TAP;
 }
 
+// Tap Dance definition: LOWER_MH
+static td_state_t td_state_lower_mh;
+
+void lower_mh_each(qk_tap_dance_state_t *state, void *user_data) {
+    if (state->pressed)
+    {
+        layer_on(_LOWER);
+    }
+}
+
+void lower_mh_finished(qk_tap_dance_state_t *state, void *user_data) {
+    td_state_lower_mh = cur_dance(state);
+    switch (td_state_lower_mh) {
+        case SINGLE_TAP:
+            // 無変換(US layout -> F15)
+            tap_code((get_highest_layer(default_layer_state) == _QWERTY_US) ? KC_F15 : KC_MHEN);
+            break;
+        default:
+            break;
+    }
+}
+
+void lower_mh_reset(qk_tap_dance_state_t *state, void *user_data) {
+    if (td_state_lower_mh != DOUBLE_TAP) {
+        layer_off(_LOWER);
+    }
+    td_state_lower_mh = UNKNOWN_TAP;
+}
+
+// Tap Dance definition: ALT_ESC_MH
+static td_state_t td_state_alt_esc_mh;
+
 void alt_esc_mh_finished(qk_tap_dance_state_t *state, void *user_data) {
-    td_state = cur_dance(state);
-    switch (td_state) {
+    td_state_alt_esc_mh = cur_dance(state);
+    switch (td_state_alt_esc_mh) {
         case SINGLE_TAP:
             register_code(KC_ESC);  // Esc
             break;
@@ -334,7 +368,7 @@ void alt_esc_mh_finished(qk_tap_dance_state_t *state, void *user_data) {
 }
 
 void alt_esc_mh_reset(qk_tap_dance_state_t *state, void *user_data) {
-    switch (td_state) {
+    switch (td_state_alt_esc_mh) {
         case SINGLE_TAP:
             unregister_code(KC_ESC);  // Escをリリース
             break;
@@ -355,7 +389,10 @@ void alt_esc_mh_reset(qk_tap_dance_state_t *state, void *user_data) {
 
 // Tap Dance Definitions
 qk_tap_dance_action_t tap_dance_actions[] = {
-    [TD_ALT_ESC_MH] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, alt_esc_mh_finished, alt_esc_mh_reset)
+    [TD_LOWER_MH] = ACTION_TAP_DANCE_FN_ADVANCED_TIME(
+        lower_mh_each, lower_mh_finished, lower_mh_reset, 200),
+    [TD_ALT_ESC_MH] = ACTION_TAP_DANCE_FN_ADVANCED_TIME(
+        NULL, alt_esc_mh_finished, alt_esc_mh_reset, 250)
 };
 
 void keyboard_post_init_user(void) {

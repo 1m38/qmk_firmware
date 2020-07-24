@@ -30,6 +30,7 @@ enum layers {
 
 enum tapdance_keycodes {
     LOWER_MH,    // 1tap: 無変換, hold: MO(_LOWER), 2tap: TG(_LOWER)
+    RAISE_HK,    // 1tap: 変換, hold: MO(_RAISE)
 };
 
 // Defines the keycodes used by our macros in process_record_user
@@ -42,8 +43,7 @@ enum custom_keycodes {
 };
 
 #define TD_LOWMH TD(LOWER_MH)
-#define RAI_HK LT(_RAISE, KC_HENK)  // タップで変換, ホールドでRAISE
-#define RAI_HKU LT(_RAISE_US, KC_F16)  // タップで変換(F16), ホールドでRAISE
+#define TD_RAIHK TD(RAISE_HK)
 #define NUMPAD TG(_NUMPAD)
 #define ALT_ESC LALT_T(KC_ESC)
 #define WINPSCR G(KC_PSCR)        // Win + PrtScr
@@ -60,7 +60,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     //|--------+--------+--------+--------+--------+--------+-----------------.  ------------------+--------+--------+--------+--------+--------+--------|
         KC_LSFT,    KC_Z,    KC_X,    KC_C,    KC_V,    KC_B, XXXXXXX, KC_LWIN,    XXXXXXX, XXXXXXX,    KC_N,    KC_M, JP_COMM,  JP_DOT, KC_MINS, JP_SLSH,\
     //|--------+--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------+--------|
-                                   RGB_TOG, ALT_ESC,TD_LOWMH,  KC_SPC, KC_BSPC,    KC_RCTL,  KC_ENT,  RAI_HK, KC_RSFT, KC_BTN3 \
+                                   RGB_TOG, ALT_ESC,TD_LOWMH,  KC_SPC, KC_BSPC,    KC_RCTL,  KC_ENT,TD_RAIHK, KC_RSFT, KC_BTN3 \
                                //`--------------------------------------------'  `--------------------------------------------'
     ),
 
@@ -72,7 +72,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     //|--------+--------+--------+--------+--------+--------+-----------------.  ------------------+--------+--------+--------+--------+--------+--------|
         _______,    KC_Z,    KC_X,    KC_C,    KC_V,    KC_B, _______, _______,    _______, _______,    KC_N,    KC_M, KC_COMM,  KC_DOT, KC_MINS, KC_SLSH,\
     //|--------+--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------+--------|
-                                   _______, _______, _______, _______, _______,    _______, _______, RAI_HKU, _______, _______ \
+                                   _______, _______, _______, _______, _______,    _______, _______, _______, _______, _______ \
                                //`--------------------------------------------'  `--------------------------------------------'
     ),
 
@@ -84,7 +84,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     //|--------+--------+--------+--------+--------+--------+-----------------.  ------------------+--------+--------+--------+--------+--------+--------|
         _______,    KC_Z,    KC_X,    KC_C,    KC_V,    KC_F, _______, _______,    _______, _______,    KC_B,    KC_H,    KC_J,    KC_L, KC_MINS, _______,\
     //|--------+--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------+--------|
-                                   _______, _______, _______, _______, _______,    _______, _______,  RAI_HK, _______, _______ \
+                                   _______, _______, _______, _______, _______,    _______, _______, _______, _______, _______ \
                                //`--------------------------------------------'  `--------------------------------------------'
     ),
 
@@ -298,10 +298,42 @@ void lower_mh_reset(qk_tap_dance_state_t *state, void *user_data) {
     lower_mh_tap_state.state = UNKNOWN_TAP;
 }
 
+// Tap Dance definition: RAISE_HK
+static tap raise_hk_tap_state = {
+    .is_press_action = true,
+    .state = UNKNOWN_TAP
+};
+
+void raise_hk_each(qk_tap_dance_state_t *state, void *user_data) {
+    if (state->pressed)
+    {
+        layer_on(_RAISE);
+    }
+}
+
+void raise_hk_finished(qk_tap_dance_state_t *state, void *user_data) {
+    raise_hk_tap_state.state = cur_dance(state);
+    switch (raise_hk_tap_state.state) {
+        case SINGLE_TAP:
+            // 変換(US layout -> F16)
+            tap_code((get_highest_layer(default_layer_state) == _QWERTY_US) ? KC_F16 : KC_HENK);
+            break;
+        default:
+            break;
+    }
+}
+
+void raise_hk_reset(qk_tap_dance_state_t *state, void *user_data) {
+    layer_off(_RAISE);
+    lower_mh_tap_state.state = UNKNOWN_TAP;
+}
+
 // Associate our tap dance key with its functionality
 qk_tap_dance_action_t tap_dance_actions[] = {
     [LOWER_MH] = ACTION_TAP_DANCE_FN_ADVANCED_TIME(
         lower_mh_each, lower_mh_finished, lower_mh_reset, 200),
+    [RAISE_HK] = ACTION_TAP_DANCE_FN_ADVANCED(
+        raise_hk_each, raise_hk_finished, raise_hk_reset),
 };
 
 #ifdef OLED_DRIVER_ENABLE

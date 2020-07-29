@@ -30,7 +30,6 @@ enum layers {
 
 enum tapdance_keycodes {
     LOWER_MH,    // 1tap: 無変換, hold: MO(_LOWER), 2tap: TG(_LOWER)
-    RAISE_HK,    // 1tap: 変換, hold: MO(_RAISE)
 };
 
 // Defines the keycodes used by our macros in process_record_user
@@ -40,10 +39,10 @@ enum custom_keycodes {
     QWER_US,
     SWAP_CA,
     ESC_MH,
+    RAISE,
 };
 
 #define TD_LOWMH TD(LOWER_MH)
-#define TD_RAIHK TD(RAISE_HK)
 #define NUMPAD TG(_NUMPAD)
 #define ALT_ESC LALT_T(KC_ESC)
 #define WINPSCR G(KC_PSCR)        // Win + PrtScr
@@ -60,7 +59,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     //|--------+--------+--------+--------+--------+--------+-----------------.  ------------------+--------+--------+--------+--------+--------+--------|
         KC_LSFT,    KC_Z,    KC_X,    KC_C,    KC_V,    KC_B, XXXXXXX, KC_LWIN,    XXXXXXX, XXXXXXX,    KC_N,    KC_M, JP_COMM,  JP_DOT, KC_MINS, JP_SLSH,\
     //|--------+--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------+--------|
-                                   RGB_TOG, ALT_ESC,TD_LOWMH,  KC_SPC, KC_BSPC,    KC_RCTL,  KC_ENT,TD_RAIHK, KC_RSFT, KC_BTN3 \
+                                   RGB_TOG, ALT_ESC,TD_LOWMH,  KC_SPC, KC_BSPC,    KC_RCTL,  KC_ENT,   RAISE, KC_RSFT, KC_BTN3 \
                                //`--------------------------------------------'  `--------------------------------------------'
     ),
 
@@ -142,7 +141,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     //|--------+--------+--------+--------+--------+--------|                                      |--------+--------+--------+--------+--------+--------|
         _______, G(KC_A), _______, G(KC_D), _______, _______,                                        KC_CAPS, KC_PSCR, _______, _______, SWAP_CA,   PANIC,\
     //|--------+--------+--------+--------+--------+--------+-----------------.  ------------------+--------+--------+--------+--------+--------+--------|
-        _______, KC_LWIN, G(KC_X), _______, G(KC_V), _______, _______, _______,    _______, _______, RGB_HUI, RGB_SAI, RGB_VAI, QWER_US,  QWERTY, EUCALYN,\
+        _______, KC_LWIN, G(KC_X), _______, G(KC_V), _______, _______, _______,      DEBUG, _______, RGB_HUI, RGB_SAI, RGB_VAI, QWER_US,  QWERTY, EUCALYN,\
     //|--------+--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------+--------|
                                    _______, _______, _______, _______, _______,    _______, _______, _______, _______, _______ \
                                //`--------------------------------------------'  `--------------------------------------------'
@@ -171,6 +170,9 @@ typedef union {
 } user_eeprom_config_t;
 user_eeprom_config_t user_eeprom_config;
 
+uint16_t timer_raise_pressed = 0;
+bool is_last_pressed_key_raise = false;
+
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 #ifdef OLED_DRIVER_ENABLE
     if (record->event.pressed) {
@@ -178,6 +180,10 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         count_type();
     }
 #endif
+    if (record->event.pressed)
+    {
+        is_last_pressed_key_raise = (keycode == RAISE);
+    }
     switch (keycode) {
         case QWERTY:
             if (record->event.pressed) {
@@ -229,6 +235,18 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             } else {
                 unregister_code(KC_ESC);
                 unregister_code((get_highest_layer(default_layer_state) == _QWERTY_US) ? KC_F15 : KC_MHEN);
+            }
+            return false;
+        case RAISE:
+            if (record->event.pressed) {
+                layer_on((get_highest_layer(default_layer_state) == _QWERTY_US) ? _RAISE_US : _RAISE);
+                timer_raise_pressed = record->event.time;
+            } else {
+                layer_off((get_highest_layer(default_layer_state) == _QWERTY_US) ? _RAISE_US : _RAISE);
+                if (is_last_pressed_key_raise && timer_elapsed(timer_raise_pressed) < TAPPING_TERM) {
+                    // tapped(released) -> F16(US) or 変換(JIS)
+                    tap_code((get_highest_layer(default_layer_state) == _QWERTY_US) ? KC_F16 : KC_HENK);
+                }
             }
             return false;
     }
@@ -298,42 +316,10 @@ void lower_mh_reset(qk_tap_dance_state_t *state, void *user_data) {
     lower_mh_tap_state.state = UNKNOWN_TAP;
 }
 
-// Tap Dance definition: RAISE_HK
-static tap raise_hk_tap_state = {
-    .is_press_action = true,
-    .state = UNKNOWN_TAP
-};
-
-void raise_hk_each(qk_tap_dance_state_t *state, void *user_data) {
-    if (state->pressed)
-    {
-        layer_on(_RAISE);
-    }
-}
-
-void raise_hk_finished(qk_tap_dance_state_t *state, void *user_data) {
-    raise_hk_tap_state.state = cur_dance(state);
-    switch (raise_hk_tap_state.state) {
-        case SINGLE_TAP:
-            // 変換(US layout -> F16)
-            tap_code((get_highest_layer(default_layer_state) == _QWERTY_US) ? KC_F16 : KC_HENK);
-            break;
-        default:
-            break;
-    }
-}
-
-void raise_hk_reset(qk_tap_dance_state_t *state, void *user_data) {
-    layer_off(_RAISE);
-    lower_mh_tap_state.state = UNKNOWN_TAP;
-}
-
 // Associate our tap dance key with its functionality
 qk_tap_dance_action_t tap_dance_actions[] = {
     [LOWER_MH] = ACTION_TAP_DANCE_FN_ADVANCED_TIME(
         lower_mh_each, lower_mh_finished, lower_mh_reset, 200),
-    [RAISE_HK] = ACTION_TAP_DANCE_FN_ADVANCED(
-        raise_hk_each, raise_hk_finished, raise_hk_reset),
 };
 
 #ifdef OLED_DRIVER_ENABLE

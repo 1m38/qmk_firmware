@@ -144,3 +144,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 /* Bootmagic Lite key configuration */
 //#define BOOTMAGIC_LITE_ROW 0
 //#define BOOTMAGIC_LITE_COLUMN 0
+
+#define ENCODERS_PAD_A { F4 }
+#define ENCODERS_PAD_B { F5 }
+#define ENCODER_RESOLUTION 4
+#define ENCODERS_PAD_A_RIGHT { F5 }
+#define ENCODERS_PAD_B_RIGHT { F4 }
+#define ENCODER_DIRECTION_FLIP

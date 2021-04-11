@@ -14,6 +14,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include QMK_KEYBOARD_H
+#include "1m38.h"
 #include "keymap_jp.h"
 
 // Defines names for use in layer keycodes and the keymap
@@ -61,7 +62,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
     [_EUCALYN] = LAYOUT(
     //         ,--------------------------------------------.                    ,--------------------------------------------.
-                    KC_Q,    KC_W, JP_COMM,  JP_DOT, JP_SCLN,                         KC_M,    KC_R,    KC_D,    KC_Y,   KC_P,\
+                    KC_Q,    KC_W, JP_COMM,  JP_DOT, KC_SCLN,                         KC_M,    KC_R,    KC_D,    KC_Y,   KC_P,\
     //|--------+--------+--------+--------+--------+--------+--------.  ,--------+--------+--------+--------+--------+--------+--------|
         _______,    KC_A,    KC_O,    KC_E,    KC_I,    KC_U, _______,    _______,    KC_G,    KC_T,    KC_K,    KC_S,    KC_N, _______,\
     //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
@@ -91,9 +92,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     //         ,--------------------------------------------.                    ,--------------------------------------------.
                    KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,                      XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,\
     //|--------+--------+--------+--------+--------+--------+--------.  ,--------+--------+--------+--------+--------+--------+--------|
-        _______,   KC_F6,   KC_F7,   KC_F8,   KC_F9,  KC_F10, _______,    _______, XXXXXXX, XXXXXXX,   KC_UP, XXXXXXX, XXXXXXX, XXXXXXX,\
+        KC_BTN1,   KC_F6,   KC_F7,   KC_F8,   KC_F9,  KC_F10, _______,    _______, XXXXXXX, XXXXXXX,   KC_UP, XXXXXXX, XXXXXXX, XXXXXXX,\
     //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
-        _______,  KC_F11,  KC_F12, XXXXXXX,  ESC_MH, XXXXXXX, _______,    _______, XXXXXXX, KC_LEFT, KC_DOWN, KC_RGHT, XXXXXXX, XXXXXXX,\
+        KC_BTN2,  KC_F11,  KC_F12, XXXXXXX,  ESC_MH, XXXXXXX, _______,    _______, XXXXXXX, KC_LEFT, KC_DOWN, KC_RGHT, XXXXXXX, XXXXXXX,\
     //|--------------------------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
                                             _______, _______, _______,    _______, _______, _______,\
     //                                    `--------+--------+--------'  `--------+--------+--------'
@@ -120,6 +121,19 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 void persistent_default_layer_set(uint16_t default_layer) {
     eeconfig_update_default_layer(default_layer);
     default_layer_set(default_layer);
+#ifdef RGBLIGHT_ENABLE
+    switch (default_layer)
+    {
+    case (1UL << _QWERTY):
+        rgblight_sethsv(160, 255, 175);     // Blue
+        break;
+    case (1UL << _EUCALYN):
+        rgblight_sethsv(80, 255, 175);      // Green
+        break;
+    default:
+        break;
+    }
+#endif
 }
 
 layer_state_t layer_state_set_user(layer_state_t state) {
@@ -245,49 +259,43 @@ qk_tap_dance_action_t tap_dance_actions[] = {
 #ifdef OLED_DRIVER_ENABLE
 oled_rotation_t oled_init_user(oled_rotation_t rotation) { return OLED_ROTATION_180; }
 
-static void render_qmk_logo(void) {
-    static const char PROGMEM qmk_logo[] = {0x80, 0x81, 0x82, 0x83, 0x84, 0x85, 0x86, 0x87, 0x88, 0x89, 0x8a, 0x8b, 0x8c, 0x8d, 0x8e, 0x8f, 0x90, 0x91, 0x92, 0x93, 0x94, 0xa0, 0xa1, 0xa2, 0xa3, 0xa4, 0xa5, 0xa6, 0xa7, 0xa8, 0xa9, 0xaa, 0xab, 0xac, 0xad, 0xae, 0xaf, 0xb0, 0xb1, 0xb2, 0xb3, 0xb4, 0xc0, 0xc1, 0xc2, 0xc3, 0xc4, 0xc5, 0xc6, 0xc7, 0xc8, 0xc9, 0xca, 0xcb, 0xcc, 0xcd, 0xce, 0xcf, 0xd0, 0xd1, 0xd2, 0xd3, 0xd4, 0};
-
+static void render_logo(void) {
+    static const char PROGMEM qmk_logo[] = {
+        0x80, 0x81, 0x82, 0x83, 0x84, 0x85, 0x86, 0x87, 0x88, 0x89, 0x8A, 0x8B, 0x8C, 0x8D, 0x8E, 0x8F, 0x90, 0x91, 0x92, 0x93, 0x94,
+        0xA0, 0xA1, 0xA2, 0xA3, 0xA4, 0xA5, 0xA6, 0xA7, 0xA8, 0xA9, 0xAA, 0xAB, 0xAC, 0xAD, 0xAE, 0xAF, 0xB0, 0xB1, 0xB2, 0xB3, 0xB4,
+        0xC0, 0xC1, 0xC2, 0xC3, 0xC4, 0xC5, 0xC6, 0xC7, 0xC8, 0xC9, 0xCA, 0xCB, 0xCC, 0xCD, 0xCE, 0xCF, 0xD0, 0xD1, 0xD2, 0xD3, 0xD4, 0x00
+    };
     oled_write_P(qmk_logo, false);
 }
+
 
 void oled_write_layer_state(void) {
     oled_write_P(PSTR("L: "), false);
     switch (get_highest_layer(layer_state | default_layer_state)) {
         case _QWERTY:
-            oled_write_P(PSTR("Qwerty"), false);
-            break;
-        case _QWERTY_US:
-            oled_write_P(PSTR("Qwerty(US)"), false);
+            oled_write_ln_P(PSTR("Qwerty"), false);
             break;
         case _EUCALYN:
-            oled_write_P(PSTR("Eucalyn"), false);
+            oled_write_ln_P(PSTR("Eucalyn"), false);
             break;
         case _RAISE:
-            oled_write_P(PSTR("Raise"), false);
-            break;
-        case _RAISE_US:
-            oled_write_P(PSTR("Raise(US)"), false);
+            oled_write_ln_P(PSTR("Raise"), false);
             break;
         case _LOWER:
-            oled_write_P(PSTR("Lower"), false);
-            break;
-        case _NUMPAD:
-            oled_write_P(PSTR("NumPad"), false);
+            oled_write_ln_P(PSTR("Lower"), false);
             break;
         case _ADJUST:
-            oled_write_P(PSTR("Adjust"), false);
+            oled_write_ln_P(PSTR("Adjust"), false);
             break;
         default:
-            oled_write_P(PSTR("Undef"), false);
+            oled_write_ln_P(PSTR("Undef"), false);
             break;
     }
-    oled_write_ln_P(user_eeprom_config.swap_caps ? PSTR(" SwCp") : PSTR(""), false);
 }
 
-static void oled_render(void) {
+void oled_task_user(void) {
     // QMK Logo and version information
-    render_qmk_logo();
+    render_logo();
 
     oled_write_layer_state();
     oled_render_host_led_state();
@@ -298,25 +306,60 @@ static void oled_render(void) {
     oled_render_rgb_value();
 #endif
 }
-
-void oled_task_user(void) {
-    oled_render();
-}
 #endif
 
 #ifdef ENCODER_ENABLE
 void encoder_update_user(uint8_t index, bool clockwise) {
     if (index == 0) {
-        if (clockwise) {
-            tap_code(KC_DOWN);
-        } else {
-            tap_code(KC_UP);
+        if (get_highest_layer(layer_state) == _RAISE) {
+            // Left/Right
+            if (clockwise) {
+                tap_code(KC_RIGHT);
+            } else {
+                tap_code(KC_LEFT);
+            }
+        }
+#ifdef RGBLIGHT_ENABLE
+        else if (get_highest_layer(layer_state) == _ADJUST) {
+            // Hue change
+            if (clockwise) {
+                rgblight_increase_hue_noeeprom();
+            } else {
+                rgblight_decrease_hue_noeeprom();
+            }
+        }
+#endif
+        else {
+            // Up/Down
+            if (clockwise) {
+                tap_code(KC_UP);
+            } else {
+                tap_code(KC_DOWN);
+            }
         }
     } else if (index == 1) {
-        if (clockwise) {
-            tap_code(KC_MS_WH_DOWN);
+        // Mouse wheel
+        if (get_highest_layer(layer_state) == _RAISE) {
+            // Horizontal wheel
+            if (clockwise) {
+                tap_code(KC_MS_WH_RIGHT);
+            } else {
+                tap_code(KC_MS_WH_LEFT);
+            }
+        } else if (get_highest_layer(layer_state) == _LOWER) {
+            // PageUp/Down
+            if (clockwise) {
+                tap_code(KC_PGDOWN);
+            } else {
+                tap_code(KC_PGUP);
+            }
         } else {
-            tap_code(KC_MS_WH_UP);
+            // Vertial wheel
+            if (clockwise) {
+                tap_code(KC_MS_WH_DOWN);
+            } else {
+                tap_code(KC_MS_WH_UP);
+            }
         }
     }
 }

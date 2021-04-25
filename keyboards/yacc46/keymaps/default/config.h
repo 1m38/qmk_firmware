@@ -1,5 +1,4 @@
 
-#define ENCODER_RESOLUTION 4
 #define TAPPING_TERM 160
 #define PERMISSIVE_HOLD
 
@@ -12,5 +11,5 @@
 #endif
 
 #if RGBRIGHT_ENABLE
-#define RGBLIGHT_LIMIT_VAL 160
+  #define RGBLIGHT_LIMIT_VAL 160
 #endif
